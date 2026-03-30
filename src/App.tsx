@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import { useApiData } from "./hooks/useApiData"
+import { useSport } from "./hooks/useSport"
 import { getScoreboard, getTeams, getInjuries, todayParam } from "./services/espn"
 import type { EspnEvent, EspnTeam } from "./types/espn"
 import Header from "./components/Header"
@@ -14,20 +15,26 @@ import Card from "./components/Card"
 const REFRESH_INTERVAL = 30_000
 
 export default function App() {
+  const { slug, config, setSport: setSportId } = useSport()
   const [selectedGame, setSelectedGame] = useState<EspnEvent | null>(null)
   const [selectedTeam, setSelectedTeam] = useState<EspnTeam | null>(null)
 
+  const handleSportChange = useCallback((id: string) => {
+    setSportId(id)
+    setSelectedTeam(null)
+  }, [setSportId])
+
   const scoreboard = useApiData(
-    useCallback(() => getScoreboard(todayParam()), []),
+    useCallback(() => getScoreboard(slug, todayParam()), [slug]),
     REFRESH_INTERVAL
   )
 
   const teams = useApiData(
-    useCallback(() => getTeams(), [])
+    useCallback(() => getTeams(slug), [slug])
   )
 
   const injuries = useApiData(
-    useCallback(() => getInjuries(), []),
+    useCallback(() => getInjuries(slug), [slug]),
     REFRESH_INTERVAL
   )
 
@@ -47,7 +54,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-court">
-      <Header />
+      <Header config={config} onSportChange={handleSportChange} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
@@ -82,11 +89,11 @@ export default function App() {
               </Card>
             )}
 
-            {injuries.status === "loading" && <Spinner />}
-            {injuries.status === "error" && (
+            {config.capabilities.injuries && injuries.status === "loading" && <Spinner />}
+            {config.capabilities.injuries && injuries.status === "error" && (
               <ErrorMessage message={`Injuries: ${injuries.error}`} />
             )}
-            {injuries.status === "success" && (
+            {config.capabilities.injuries && injuries.status === "success" && filteredInjuries.length > 0 && (
               <Card
                 title="Injury Report"
                 subtitle={`${filteredInjuries.reduce((sum, t) => sum + t.injuries.length, 0)} players`}

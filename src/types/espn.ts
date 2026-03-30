@@ -200,6 +200,10 @@ export interface EspnEvent {
     type: number
     slug: string
   }
+  week?: {
+    number: number
+    text: string
+  }
   competitions: EspnCompetition[]
   links?: EspnLink[]
   status: EspnGameStatus
@@ -274,7 +278,7 @@ export interface EspnInjuryDetail {
   }
   source: { id: string; description: string; state: string }
   type: { id: string; name: string; type: string; abbreviation: string }
-  details: {
+  details?: {
     fantasyStatus: { description: string; abbreviation: string }
     type: string
     location: string

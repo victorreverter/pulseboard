@@ -58,9 +58,9 @@ export default function InjuryFeed({ injuries }: Props) {
                 </span>
               </div>
               <p className="text-xs text-text-muted truncate mt-0.5">
-                {inj.details.type && `${inj.details.type}`}
-                {inj.details.location && ` · ${inj.details.location}`}
-                {inj.details.side && ` (${inj.details.side})`}
+                {inj.details?.type && `${inj.details.type}`}
+                {inj.details?.location && ` · ${inj.details.location}`}
+                {inj.details?.side && ` (${inj.details.side})`}
               </p>
               <p className="text-[11px] text-text-secondary mt-1 line-clamp-2">
                 {inj.shortComment}

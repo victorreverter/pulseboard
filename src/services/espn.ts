@@ -7,13 +7,21 @@ import type {
 
 const isDev = import.meta.env.DEV
 
-const SITE = isDev
-  ? "/api/espn/apis/site/v2/sports/basketball/nba"
-  : "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+function siteUrl(sportSlug: string, path: string): string {
+  const base = isDev
+    ? `/api/espn/apis/site/v2/sports`
+    : "https://site.api.espn.com/apis/site/v2/sports"
+  return `${base}/${sportSlug}${path}`
+}
 
-const CORE = isDev
-  ? "/api/core-espn/v2/sports/basketball/leagues/nba"
-  : "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba"
+function coreUrl(sportSlug: string, path: string): string {
+  const base = isDev
+    ? "/api/core-espn/v2/sports"
+    : "https://sports.core.api.espn.com/v2/sports"
+
+  const [sport, league] = sportSlug.split("/")
+  return `${base}/${sport}/leagues/${league}${path}`
+}
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url)
@@ -21,31 +29,33 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json()
 }
 
-export function getScoreboard(date?: string): Promise<EspnScoreboardResponse> {
+export function getScoreboard(
+  sportSlug: string,
+  date?: string
+): Promise<EspnScoreboardResponse> {
   const params = date ? `?dates=${date}` : ""
-  return fetchJson(`${SITE}/scoreboard${params}`)
+  return fetchJson(siteUrl(sportSlug, `/scoreboard${params}`))
 }
 
-export function getTeams(): Promise<EspnTeamsResponse> {
-  return fetchJson(`${SITE}/teams`)
+export function getTeams(sportSlug: string): Promise<EspnTeamsResponse> {
+  return fetchJson(siteUrl(sportSlug, "/teams"))
 }
 
-export function getInjuries(): Promise<EspnInjuriesResponse> {
-  return fetchJson(`${SITE}/injuries`)
+export function getInjuries(sportSlug: string): Promise<EspnInjuriesResponse> {
+  return fetchJson(siteUrl(sportSlug, "/injuries"))
 }
 
 export function getOdds(
+  sportSlug: string,
   eventId: string,
   competitionId: string
 ): Promise<EspnOddsResponse> {
   return fetchJson(
-    `${CORE}/events/${eventId}/competitions/${competitionId}/odds/100?lang=en&region=us`
+    coreUrl(
+      sportSlug,
+      `/events/${eventId}/competitions/${competitionId}/odds/100?lang=en&region=us`
+    )
   )
-}
-
-export function getSchedule(date?: string): Promise<EspnScoreboardResponse> {
-  const params = date ? `?dates=${date}` : ""
-  return fetchJson(`${SITE}/scoreboard${params}`)
 }
 
 export function formatDateParam(date: Date): string {

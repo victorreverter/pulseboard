@@ -7,6 +7,32 @@ interface Props {
   onClose: () => void
 }
 
+function periodLabels(count: number, uid: string): string[] {
+  if (uid.includes("soccer")) {
+    const labels = ["1H", "2H"]
+    for (let i = 3; i <= count; i++) labels.push(`ET${i - 2}`)
+    return labels.slice(0, count)
+  }
+  if (uid.includes("hockey")) {
+    const labels = ["P1", "P2", "P3"]
+    for (let i = 4; i <= count; i++) labels.push(`OT${i - 3}`)
+    return labels.slice(0, count)
+  }
+  const labels = ["Q1", "Q2", "Q3", "Q4"]
+  for (let i = 5; i <= count; i++) labels.push(`OT${i - 4}`)
+  return labels.slice(0, count)
+}
+
+function periodShortLabel(period: number, uid: string): string {
+  if (uid.includes("soccer")) {
+    return period === 1 ? "1H" : period === 2 ? "2H" : `ET${period - 2}`
+  }
+  if (uid.includes("hockey")) {
+    return period <= 3 ? `P${period}` : `OT${period - 3}`
+  }
+  return period <= 4 ? `Q${period}` : `OT${period - 4}`
+}
+
 function StatRow({ label, away, home }: { label: string; away: string; home: string }) {
   const aNum = parseFloat(away) || 0
   const hNum = parseFloat(home) || 0
@@ -58,6 +84,51 @@ function CompetitorHeader({ comp, side }: { comp: EspnCompetitor; side: "away" |
   )
 }
 
+function availableStats(competitors: EspnCompetitor[]): { key: string; label: string }[] {
+  const statNames = new Set<string>()
+  for (const c of competitors) {
+    for (const s of c.statistics ?? []) {
+      statNames.add(s.name)
+    }
+  }
+
+  const allStatOptions = [
+    { key: "goals", label: "Goals" },
+    { key: "assists", label: "Assists" },
+    { key: "shots", label: "Shots" },
+    { key: "shotsOnTarget", label: "Shots on Target" },
+    { key: "possessionPct", label: "Possession" },
+    { key: "fouls", label: "Fouls" },
+    { key: "corners", label: "Corners" },
+    { key: "saves", label: "Saves" },
+    { key: "hits", label: "Hits" },
+    { key: "faceoffWinPct", label: "Faceoff %" },
+    { key: "powerPlayGoals", label: "PP Goals" },
+    { key: "penaltyMinutes", label: "PIM" },
+    { key: "fieldGoalsMade", label: "FG Made" },
+    { key: "fieldGoalsAttempted", label: "FG Att" },
+    { key: "threePointFieldGoalsMade", label: "3PT Made" },
+    { key: "freeThrowsMade", label: "FT Made" },
+    { key: "totalRebounds", label: "Rebounds" },
+    { key: "assists", label: "Assists" },
+    { key: "steals", label: "Steals" },
+    { key: "blocks", label: "Blocks" },
+    { key: "turnovers", label: "Turnovers" },
+    { key: "avgRebounds", label: "RPG" },
+    { key: "rushingYards", label: "Rush Yds" },
+    { key: "passingYards", label: "Pass Yds" },
+    { key: "totalYards", label: "Total Yds" },
+    { key: "turnovers", label: "Turnovers" },
+    { key: "hits", label: "Hits" },
+    { key: "runs", label: "Runs" },
+    { key: "hits", label: "Hits" },
+    { key: "errors", label: "Errors" },
+    { key: "battingAverage", label: "AVG" },
+  ]
+
+  return allStatOptions.filter((s) => statNames.has(s.key)).slice(0, 10)
+}
+
 export default function GameDetail({ event, onClose }: Props) {
   const comp = event.competitions?.[0]
   if (!comp) return null
@@ -73,18 +144,9 @@ export default function GameDetail({ event, onClose }: Props) {
     (away.statistics ?? []).map((s) => [s.name, s.displayValue])
   )
 
-  const statsToShow = [
-    { key: "fieldGoalsMade", label: "FG Made" },
-    { key: "fieldGoalsAttempted", label: "FG Att" },
-    { key: "threePointFieldGoalsMade", label: "3PT Made" },
-    { key: "freeThrowsMade", label: "FT Made" },
-    { key: "totalRebounds", label: "Rebounds" },
-    { key: "assists", label: "Assists" },
-    { key: "steals", label: "Steals" },
-    { key: "blocks", label: "Blocks" },
-    { key: "turnovers", label: "Turnovers" },
-    { key: "avgRebounds", label: "RPG" },
-  ]
+  const statsToShow = availableStats(comp.competitors)
+  const lineCount = Math.max(away.linescores?.length ?? 0, home.linescores?.length ?? 0)
+  const labels = periodLabels(lineCount, event.uid)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -95,12 +157,17 @@ export default function GameDetail({ event, onClose }: Props) {
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-live animate-pulse" />
                 <span className="text-xs font-mono text-live font-semibold">
-                  {event.status.displayClock} - Q{event.status.period}
+                  {event.status.displayClock} - {periodShortLabel(event.status.period, event.uid)}
                 </span>
               </span>
             )}
             {isFinal(event) && (
               <span className="text-xs font-semibold text-text-muted uppercase">Final</span>
+            )}
+            {event.week && (
+              <span className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded">
+                Week {event.week.number}
+              </span>
             )}
           </div>
           <button
@@ -135,27 +202,36 @@ export default function GameDetail({ event, onClose }: Props) {
             <CompetitorHeader comp={home} side="home" />
           </div>
 
-          {(away.linescores?.length > 0 || home.linescores?.length > 0) && (
+          {lineCount > 0 && (
             <div className="mb-6">
               <h3 className="text-[10px] text-text-muted uppercase tracking-wider mb-2 text-center">
                 Scoring by Period
               </h3>
               <div className="bg-court-light/50 rounded-xl p-3">
-                <div className="grid grid-cols-[auto_repeat(4,1fr)_auto] gap-2 text-[10px] text-text-muted text-center mb-1">
+                <div
+                  className="grid gap-2 text-[10px] text-text-muted text-center mb-1"
+                  style={{ gridTemplateColumns: `auto repeat(${lineCount}, 1fr) auto` }}
+                >
                   <span />
-                  {["Q1", "Q2", "Q3", "Q4"].map((q) => (
-                    <span key={q}>{q}</span>
+                  {labels.map((l) => (
+                    <span key={l}>{l}</span>
                   ))}
                   <span className="font-semibold">T</span>
                 </div>
-                <div className="grid grid-cols-[auto_repeat(4,1fr)_auto] gap-2 text-xs text-center">
+                <div
+                  className="grid gap-2 text-xs text-center"
+                  style={{ gridTemplateColumns: `auto repeat(${lineCount}, 1fr) auto` }}
+                >
                   <span className="text-text-secondary text-[10px]">{away.team.abbreviation}</span>
                   {away.linescores?.map((ls) => (
                     <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
                   ))}
                   <span className="font-mono font-bold text-text-primary">{away.score}</span>
                 </div>
-                <div className="grid grid-cols-[auto_repeat(4,1fr)_auto] gap-2 text-xs text-center mt-1">
+                <div
+                  className="grid gap-2 text-xs text-center mt-1"
+                  style={{ gridTemplateColumns: `auto repeat(${lineCount}, 1fr) auto` }}
+                >
                   <span className="text-text-secondary text-[10px]">{home.team.abbreviation}</span>
                   {home.linescores?.map((ls) => (
                     <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
@@ -166,7 +242,7 @@ export default function GameDetail({ event, onClose }: Props) {
             </div>
           )}
 
-          {comp.competitors[0]?.statistics?.length > 0 && (
+          {statsToShow.length > 0 && (
             <div>
               <h3 className="text-[10px] text-text-muted uppercase tracking-wider mb-2 text-center">
                 Stats

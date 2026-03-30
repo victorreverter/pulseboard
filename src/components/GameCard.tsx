@@ -7,6 +7,16 @@ interface Props {
   onClick?: (event: EspnEvent) => void
 }
 
+function periodLabel(period: number, uid: string): string {
+  if (uid.includes("soccer")) {
+    return period === 1 ? "1H" : period === 2 ? "2H" : `ET${period - 2}`
+  }
+  if (uid.includes("hockey")) {
+    return `P${period}`
+  }
+  return `Q${period}`
+}
+
 function TeamRow({
   team,
   score,
@@ -76,7 +86,7 @@ function GameStatus({ event }: { event: EspnEvent }) {
       <div className="flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full bg-live animate-pulse" />
         <span className="text-xs font-mono text-live font-semibold">
-          {status.displayClock} - Q{status.period}
+          {status.displayClock} - {periodLabel(status.period, event.uid)}
         </span>
       </div>
     )
@@ -95,7 +105,14 @@ function GameStatus({ event }: { event: EspnEvent }) {
   })
 
   return (
-    <span className="text-xs font-mono text-text-muted">{gameTime}</span>
+    <div className="flex items-center gap-2">
+      {event.week && (
+        <span className="text-[10px] font-medium text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+          Week {event.week.number}
+        </span>
+      )}
+      <span className="text-xs font-mono text-text-muted">{gameTime}</span>
+    </div>
   )
 }
 
