@@ -5,8 +5,15 @@ import type {
   EspnOddsResponse,
 } from "../types/espn"
 
-const SITE_BASE = "/api/espn/apis/site/v2/sports/basketball/nba"
-const CORE_BASE = "/api/core-espn/v2/sports/basketball/leagues/nba"
+const isDev = import.meta.env.DEV
+
+const SITE = isDev
+  ? "/api/espn/apis/site/v2/sports/basketball/nba"
+  : "https://site.api.espn.com/apis/site/v2/sports/basketball/nba"
+
+const CORE = isDev
+  ? "/api/core-espn/v2/sports/basketball/leagues/nba"
+  : "https://sports.core.api.espn.com/v2/sports/basketball/leagues/nba"
 
 async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url)
@@ -16,15 +23,15 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 export function getScoreboard(date?: string): Promise<EspnScoreboardResponse> {
   const params = date ? `?dates=${date}` : ""
-  return fetchJson(`${SITE_BASE}/scoreboard${params}`)
+  return fetchJson(`${SITE}/scoreboard${params}`)
 }
 
 export function getTeams(): Promise<EspnTeamsResponse> {
-  return fetchJson(`${SITE_BASE}/teams`)
+  return fetchJson(`${SITE}/teams`)
 }
 
 export function getInjuries(): Promise<EspnInjuriesResponse> {
-  return fetchJson(`${SITE_BASE}/injuries`)
+  return fetchJson(`${SITE}/injuries`)
 }
 
 export function getOdds(
@@ -32,13 +39,13 @@ export function getOdds(
   competitionId: string
 ): Promise<EspnOddsResponse> {
   return fetchJson(
-    `${CORE_BASE}/events/${eventId}/competitions/${competitionId}/odds/100?lang=en&region=us`
+    `${CORE}/events/${eventId}/competitions/${competitionId}/odds/100?lang=en&region=us`
   )
 }
 
 export function getSchedule(date?: string): Promise<EspnScoreboardResponse> {
   const params = date ? `?dates=${date}` : ""
-  return fetchJson(`${SITE_BASE}/scoreboard${params}`)
+  return fetchJson(`${SITE}/scoreboard${params}`)
 }
 
 export function formatDateParam(date: Date): string {
