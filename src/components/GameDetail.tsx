@@ -86,7 +86,7 @@ function CompetitorHeader({ comp, side }: { comp: EspnCompetitor; side: "away" |
   )
 }
 
-function availableStats(competitors: EspnCompetitor[]): { key: string; label: string }[] {
+function availableStats(competitors: EspnCompetitor[], uid: string): { key: string; label: string }[] {
   const statNames = new Set<string>()
   for (const c of competitors) {
     for (const s of c.statistics ?? []) {
@@ -94,41 +94,70 @@ function availableStats(competitors: EspnCompetitor[]): { key: string; label: st
     }
   }
 
-  const allStatOptions = [
-    { key: "goals", label: "Goals" },
-    { key: "assists", label: "Assists" },
-    { key: "shots", label: "Shots" },
-    { key: "shotsOnTarget", label: "Shots on Target" },
-    { key: "possessionPct", label: "Possession" },
-    { key: "fouls", label: "Fouls" },
-    { key: "corners", label: "Corners" },
-    { key: "saves", label: "Saves" },
-    { key: "hits", label: "Hits" },
-    { key: "faceoffWinPct", label: "Faceoff %" },
-    { key: "powerPlayGoals", label: "PP Goals" },
-    { key: "penaltyMinutes", label: "PIM" },
-    { key: "fieldGoalsMade", label: "FG Made" },
-    { key: "fieldGoalsAttempted", label: "FG Att" },
-    { key: "threePointFieldGoalsMade", label: "3PT Made" },
-    { key: "freeThrowsMade", label: "FT Made" },
-    { key: "totalRebounds", label: "Rebounds" },
-    { key: "assists", label: "Assists" },
-    { key: "steals", label: "Steals" },
-    { key: "blocks", label: "Blocks" },
-    { key: "turnovers", label: "Turnovers" },
-    { key: "avgRebounds", label: "RPG" },
-    { key: "rushingYards", label: "Rush Yds" },
-    { key: "passingYards", label: "Pass Yds" },
-    { key: "totalYards", label: "Total Yds" },
-    { key: "turnovers", label: "Turnovers" },
-    { key: "hits", label: "Hits" },
-    { key: "runs", label: "Runs" },
-    { key: "hits", label: "Hits" },
-    { key: "errors", label: "Errors" },
-    { key: "battingAverage", label: "AVG" },
-  ]
+  const statMap: Record<string, { key: string; label: string }[]> = {
+    soccer: [
+      { key: "totalGoals", label: "Goals" },
+      { key: "totalShots", label: "Shots" },
+      { key: "shotsOnTarget", label: "On Target" },
+      { key: "possessionPct", label: "Possession" },
+      { key: "foulsCommitted", label: "Fouls" },
+      { key: "wonCorners", label: "Corners" },
+      { key: "goalAssists", label: "Assists" },
+      { key: "shotAssists", label: "Key Passes" },
+      { key: "saves", label: "Saves" },
+    ],
+    hockey: [
+      { key: "goals", label: "Goals" },
+      { key: "assists", label: "Assists" },
+      { key: "points", label: "Points" },
+      { key: "saves", label: "Saves" },
+      { key: "savePct", label: "Save %" },
+      { key: "ytdGoals", label: "Season Goals" },
+    ],
+    baseball: [
+      { key: "runs", label: "Runs" },
+      { key: "hits", label: "Hits" },
+      { key: "errors", label: "Errors" },
+      { key: "avg", label: "AVG" },
+      { key: "ERA", label: "ERA" },
+      { key: "wins", label: "Wins" },
+      { key: "losses", label: "Losses" },
+      { key: "saves", label: "Saves" },
+    ],
+    football: [
+      { key: "rushingYards", label: "Rush Yds" },
+      { key: "passingYards", label: "Pass Yds" },
+      { key: "totalYards", label: "Total Yds" },
+      { key: "turnovers", label: "Turnovers" },
+      { key: "possessionTime", label: "Possession" },
+      { key: "firstDowns", label: "1st Downs" },
+    ],
+    basketball: [
+      { key: "fieldGoalsMade", label: "FG" },
+      { key: "fieldGoalsAttempted", label: "FGA" },
+      { key: "threePointFieldGoalsMade", label: "3PT" },
+      { key: "freeThrowsMade", label: "FT" },
+      { key: "totalRebounds", label: "Reb" },
+      { key: "assists", label: "AST" },
+      { key: "steals", label: "STL" },
+      { key: "blocks", label: "BLK" },
+      { key: "turnovers", label: "TO" },
+    ],
+  }
 
-  return allStatOptions.filter((s) => statNames.has(s.key)).slice(0, 10)
+  let sportType = "basketball"
+  if (uid.includes("soccer")) sportType = "soccer"
+  else if (uid.includes("hockey")) sportType = "hockey"
+  else if (uid.includes("baseball")) sportType = "baseball"
+  else if (uid.includes("football")) sportType = "football"
+
+  const sportStats = statMap[sportType] ?? statMap.basketball
+  const uniqueStats = new Map<string, { key: string; label: string }>()
+  for (const stat of sportStats) {
+    uniqueStats.set(stat.key, stat)
+  }
+
+  return [...uniqueStats.values()].filter((s) => statNames.has(s.key))
 }
 
 export default function GameDetail({ event, sportSlug, onClose }: Props) {
@@ -146,7 +175,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
     (away.statistics ?? []).map((s) => [s.name, s.displayValue])
   )
 
-  const statsToShow = availableStats(comp.competitors)
+  const statsToShow = availableStats(comp.competitors, event.uid)
   const lineCount = Math.max(away.linescores?.length ?? 0, home.linescores?.length ?? 0)
   const labels = periodLabels(lineCount, event.uid)
 
@@ -267,41 +296,91 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
             </div>
           )}
 
-          {comp.competitors.some((c) => c.leaders?.length > 0) && (
+          {comp.leaders && comp.leaders.length > 0 && (() => {
+            const seen = new Set<string>()
+            const uniqueLeaders = comp.leaders.filter((cat) => {
+              if (seen.has(cat.displayName)) return false
+              seen.add(cat.displayName)
+              return true
+            })
+
+            return (
+              <div className="mt-6">
+                <h3 className="text-[10px] text-text-muted uppercase tracking-wider mb-2 text-center">
+                  Leaders
+                </h3>
+                <div className="bg-court-light/50 rounded-xl p-3 space-y-3">
+                  {uniqueLeaders.map((cat) => (
+                    <div key={cat.name}>
+                      <p className="text-[10px] text-text-muted uppercase mb-1">{cat.displayName}</p>
+                      {cat.leaders?.slice(0, 1).map((leader) => (
+                        <div key={leader.athlete.id} className="flex items-center gap-2">
+                          {leader.athlete.headshot && (
+                            <img
+                              src={leader.athlete.headshot.href}
+                              alt={leader.athlete.fullName}
+                              className="w-7 h-7 rounded-full object-cover"
+                            />
+                          )}
+                          <span className="text-xs font-medium text-text-primary truncate">
+                            {leader.athlete.fullName}
+                          </span>
+                          <span className="text-xs font-mono text-accent ml-auto">
+                            {leader.displayValue}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+
+          {comp.competitors.some((c) => c.leaders?.length > 0) && !comp.leaders?.length && (
             <div className="mt-6">
               <h3 className="text-[10px] text-text-muted uppercase tracking-wider mb-2 text-center">
                 Leaders
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                {[away, home].map((comp) => (
-                  <div key={comp.id} className="bg-court-light/50 rounded-xl p-3">
-                    <p className="text-[10px] text-text-muted uppercase mb-2 text-center">
-                      {comp.team.abbreviation}
-                    </p>
-                    {comp.leaders?.map((cat) => (
-                      <div key={cat.name} className="mb-2 last:mb-0">
-                        <p className="text-[10px] text-text-muted uppercase">{cat.displayName}</p>
-                        {cat.leaders?.slice(0, 1).map((leader) => (
-                          <div key={leader.athlete.id} className="flex items-center gap-2 mt-0.5">
-                            {leader.athlete.headshot && (
-                              <img
-                                src={leader.athlete.headshot.href}
-                                alt={leader.athlete.fullName}
-                                className="w-6 h-6 rounded-full object-cover"
-                              />
-                            )}
-                            <span className="text-xs text-text-primary truncate">
-                              {leader.athlete.shortName}
-                            </span>
-                            <span className="text-xs font-mono text-accent ml-auto">
-                              {leader.displayValue}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                {[away, home].map((comp) => {
+                  const seen = new Set<string>()
+                  const uniqueLeaders = (comp.leaders ?? []).filter((cat) => {
+                    if (seen.has(cat.displayName)) return false
+                    seen.add(cat.displayName)
+                    return true
+                  })
+
+                  return (
+                    <div key={comp.id} className="bg-court-light/50 rounded-xl p-3">
+                      <p className="text-[10px] text-text-muted uppercase mb-2 text-center">
+                        {comp.team.abbreviation}
+                      </p>
+                      {uniqueLeaders.map((cat) => (
+                        <div key={cat.name} className="mb-2 last:mb-0">
+                          <p className="text-[10px] text-text-muted uppercase">{cat.displayName}</p>
+                          {cat.leaders?.slice(0, 1).map((leader) => (
+                            <div key={leader.athlete.id} className="flex items-center gap-2 mt-0.5">
+                              {leader.athlete.headshot && (
+                                <img
+                                  src={leader.athlete.headshot.href}
+                                  alt={leader.athlete.fullName}
+                                  className="w-6 h-6 rounded-full object-cover"
+                                />
+                              )}
+                              <span className="text-xs text-text-primary truncate">
+                                {leader.athlete.shortName}
+                              </span>
+                              <span className="text-xs font-mono text-accent ml-auto">
+                                {leader.displayValue}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

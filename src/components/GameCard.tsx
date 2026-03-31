@@ -136,7 +136,7 @@ export default function GameCard({ event, onClick }: Props) {
         <GameStatus event={event} />
         {comp.headlines?.[0] && (
           <span className="text-[10px] text-text-muted truncate max-w-[60%]">
-            {comp.headlines[0].description}
+            {comp.headlines[0].shortLinkText}
           </span>
         )}
       </div>

@@ -156,6 +156,7 @@ export interface EspnCompetition {
   broadcasts: EspnBroadcast[]
   headlines: EspnHeadline[]
   highlights?: unknown[]
+  leaders?: EspnLeaderCategory[]
 }
 
 export interface EspnGameStatus {
