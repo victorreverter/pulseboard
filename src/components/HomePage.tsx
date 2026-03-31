@@ -3,6 +3,7 @@ import type { EspnEvent } from "../types/espn"
 import type { SportEvent } from "../hooks/useMultiSport"
 import { SPORTS } from "../config/sports"
 import LiveSection from "./LiveSection"
+import NextEventsCountdown from "./NextEventsCountdown"
 import SportGroup from "./SportGroup"
 import Spinner from "./Spinner"
 
@@ -92,7 +93,18 @@ export default function HomePage({ state, onGameClick, onSeeAll }: Props) {
     <div className="space-y-8">
       <LiveSection events={live} onGameClick={onGameClick} />
 
+      <NextEventsCountdown upcoming={upcoming} live={live} />
+
       <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h2 className="text-sm font-bold text-text-primary uppercase tracking-wider">
+            Coming Events
+          </h2>
+        </div>
+
         {sortedLeagues.map(({ sport }) => {
           const leagueLive = liveByLeague.get(sport.id) ?? []
           const leagueUpcoming = upcomingByLeague.get(sport.id) ?? []
