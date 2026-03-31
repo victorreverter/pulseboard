@@ -5,9 +5,10 @@ interface Props {
   teams: EspnTeam[]
   selectedId?: string
   onSelect?: (team: EspnTeam) => void
+  onDoubleClick?: (team: EspnTeam) => void
 }
 
-export default function TeamGrid({ teams, selectedId, onSelect }: Props) {
+export default function TeamGrid({ teams, selectedId, onSelect, onDoubleClick }: Props) {
   return (
     <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
       {teams.map((team) => {
@@ -18,6 +19,7 @@ export default function TeamGrid({ teams, selectedId, onSelect }: Props) {
           <button
             key={team.id}
             onClick={() => onSelect?.(team)}
+            onDoubleClick={() => onDoubleClick?.(team)}
             className={`flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-150 ${
               isSelected
                 ? "ring-2 ring-accent bg-accent/10"

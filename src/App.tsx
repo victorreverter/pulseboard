@@ -8,6 +8,7 @@ import Scoreboard from "./components/Scoreboard"
 import InjuryFeed from "./components/InjuryFeed"
 import TeamGrid from "./components/TeamGrid"
 import GameDetail from "./components/GameDetail"
+import TeamDetail from "./components/TeamDetail"
 import Spinner from "./components/Spinner"
 import ErrorMessage from "./components/ErrorMessage"
 import Card from "./components/Card"
@@ -16,17 +17,32 @@ const REFRESH_INTERVAL = 30_000
 
 export default function App() {
   const { slug, config, setSport: setSportId } = useSport()
+  const [date, setDate] = useState(todayParam)
   const [selectedGame, setSelectedGame] = useState<EspnEvent | null>(null)
   const [selectedTeam, setSelectedTeam] = useState<EspnTeam | null>(null)
+  const [detailTeam, setDetailTeam] = useState<EspnTeam | null>(null)
 
   const handleSportChange = useCallback((id: string) => {
     setSportId(id)
     setSelectedTeam(null)
+    setDetailTeam(null)
   }, [setSportId])
 
+  const handleDateChange = useCallback((newDate: string) => {
+    setDate(newDate)
+  }, [])
+
+  const handleTeamSelect = useCallback((team: EspnTeam) => {
+    setSelectedTeam((prev) => (prev?.id === team.id ? null : team))
+  }, [])
+
+  const handleTeamClick = useCallback((team: EspnTeam) => {
+    setDetailTeam(team)
+  }, [])
+
   const scoreboard = useApiData(
-    useCallback(() => getScoreboard(slug, todayParam()), [slug]),
-    REFRESH_INTERVAL
+    useCallback(() => getScoreboard(slug, date), [slug, date]),
+    date === todayParam() ? REFRESH_INTERVAL : undefined
   )
 
   const teams = useApiData(
@@ -64,7 +80,12 @@ export default function App() {
               <ErrorMessage message={`Scoreboard: ${scoreboard.error}`} />
             )}
             {scoreboard.status === "success" && (
-              <Scoreboard events={events} onGameClick={setSelectedGame} />
+              <Scoreboard
+                events={events}
+                date={date}
+                onDateChange={handleDateChange}
+                onGameClick={setSelectedGame}
+              />
             )}
           </div>
 
@@ -72,7 +93,7 @@ export default function App() {
             {teams.status === "success" && (
               <Card
                 title="Teams"
-                subtitle={selectedTeam ? `${selectedTeam.displayName} selected` : "Filter injuries"}
+                subtitle={selectedTeam ? `${selectedTeam.displayName} selected` : "Click to filter · Double-click for details"}
                 icon={
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -82,9 +103,8 @@ export default function App() {
                 <TeamGrid
                   teams={allTeams}
                   selectedId={selectedTeam?.id}
-                  onSelect={(team) =>
-                    setSelectedTeam((prev) => (prev?.id === team.id ? null : team))
-                  }
+                  onSelect={handleTeamSelect}
+                  onDoubleClick={handleTeamClick}
                 />
               </Card>
             )}
@@ -111,7 +131,19 @@ export default function App() {
       </main>
 
       {selectedGame && (
-        <GameDetail event={selectedGame} onClose={() => setSelectedGame(null)} />
+        <GameDetail
+          event={selectedGame}
+          sportSlug={slug}
+          onClose={() => setSelectedGame(null)}
+        />
+      )}
+
+      {detailTeam && (
+        <TeamDetail
+          team={detailTeam}
+          sportSlug={slug}
+          onClose={() => setDetailTeam(null)}
+        />
       )}
     </div>
   )

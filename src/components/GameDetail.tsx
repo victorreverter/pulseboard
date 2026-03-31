@@ -1,9 +1,11 @@
 import type { EspnEvent, EspnCompetitor } from "../types/espn"
 import { hexToRgba } from "../lib/utils"
 import { isLive, isFinal } from "../services/espn"
+import OddsPanel from "./OddsPanel"
 
 interface Props {
   event: EspnEvent
+  sportSlug: string
   onClose: () => void
 }
 
@@ -129,7 +131,7 @@ function availableStats(competitors: EspnCompetitor[]): { key: string; label: st
   return allStatOptions.filter((s) => statNames.has(s.key)).slice(0, 10)
 }
 
-export default function GameDetail({ event, onClose }: Props) {
+export default function GameDetail({ event, sportSlug, onClose }: Props) {
   const comp = event.competitions?.[0]
   if (!comp) return null
 
@@ -303,6 +305,16 @@ export default function GameDetail({ event, onClose }: Props) {
               </div>
             </div>
           )}
+
+          <div className="mt-6">
+            <OddsPanel
+              sportSlug={sportSlug}
+              eventId={event.id}
+              competitionId={comp.id}
+              homeName={home.team.displayName}
+              awayName={away.team.displayName}
+            />
+          </div>
 
           {comp.headlines?.length > 0 && (
             <div className="mt-6">
