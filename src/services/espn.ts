@@ -7,7 +7,7 @@ import type {
 
 const isDev = import.meta.env.DEV
 
-function siteUrl(sportSlug: string, path: string): string {
+export function siteUrl(sportSlug: string, path: string): string {
   const base = isDev
     ? `/api/espn/apis/site/v2/sports`
     : "https://site.api.espn.com/apis/site/v2/sports"

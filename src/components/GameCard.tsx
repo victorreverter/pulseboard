@@ -1,20 +1,11 @@
 import type { EspnEvent, EspnWinProbability } from "../types/espn"
 import { hexToRgba } from "../lib/utils"
+import { periodShortLabel } from "../lib/periods"
 import { isLive, isFinal } from "../services/espn"
 
 interface Props {
   event: EspnEvent
   onClick?: (event: EspnEvent) => void
-}
-
-function periodLabel(period: number, uid: string): string {
-  if (uid.includes("soccer")) {
-    return period === 1 ? "1H" : period === 2 ? "2H" : `ET${period - 2}`
-  }
-  if (uid.includes("hockey")) {
-    return `P${period}`
-  }
-  return `Q${period}`
 }
 
 function TeamRow({
@@ -37,7 +28,7 @@ function TeamRow({
         style={{ background: hexToRgba(team.color, 0.15) }}
       >
         {logo ? (
-          <img src={logo} alt={team.abbreviation} className="w-6 h-6 object-contain" />
+          <img src={logo} alt={team.abbreviation} className="w-6 h-6 object-contain" loading="lazy" />
         ) : (
           <span className="text-xs font-bold" style={{ color: `#${team.color}` }}>
             {team.abbreviation}
@@ -86,7 +77,7 @@ function GameStatus({ event }: { event: EspnEvent }) {
       <div className="flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full bg-live animate-pulse" />
         <span className="text-xs font-mono text-live font-semibold">
-          {status.displayClock} - {periodLabel(status.period, event.uid)}
+          {status.displayClock} - {periodShortLabel(status.period, event.uid)}
         </span>
       </div>
     )
@@ -124,8 +115,7 @@ export default function GameCard({ event, onClick }: Props) {
   const away = comp.competitors.find((c) => c.homeAway === "away")
   if (!home || !away) return null
 
-  const situation = comp as unknown as { situation?: { lastPlay: { probability: EspnWinProbability } } }
-  const probability = situation.situation?.lastPlay?.probability
+  const probability = comp.situation?.lastPlay?.probability
 
   return (
     <button

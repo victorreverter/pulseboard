@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 
 type AsyncState<T> =
   | { status: "idle" }
@@ -11,16 +11,6 @@ export function useApiData<T>(
   refreshMs?: number
 ) {
   const [state, setState] = useState<AsyncState<T>>({ status: "loading" })
-
-  const load = useCallback(async () => {
-    setState({ status: "loading" })
-    try {
-      const data = await fetcher()
-      setState({ status: "success", data })
-    } catch (err) {
-      setState({ status: "error", error: String(err) })
-    }
-  }, [fetcher])
 
   useEffect(() => {
     let cancelled = false
@@ -49,5 +39,5 @@ export function useApiData<T>(
     }
   }, [fetcher, refreshMs])
 
-  return { ...state, reload: load }
+  return state
 }

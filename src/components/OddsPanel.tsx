@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { getOdds } from "../services/espn"
 import type { EspnOddsResponse } from "../types/espn"
 import Spinner from "./Spinner"
@@ -33,8 +33,6 @@ type OddsState =
 
 export default function OddsPanel({ sportSlug, eventId, competitionId, homeName, awayName }: Props) {
   const [state, setState] = useState<OddsState>({ status: "loading" })
-  const key = `${sportSlug}-${eventId}-${competitionId}`
-  const prevKey = useRef(key)
 
   useEffect(() => {
     let cancelled = false
@@ -50,10 +48,9 @@ export default function OddsPanel({ sportSlug, eventId, competitionId, homeName,
     }
 
     fetchOdds()
-    prevKey.current = key
 
     return () => { cancelled = true }
-  }, [sportSlug, eventId, competitionId, key])
+  }, [sportSlug, eventId, competitionId])
 
   if (state.status === "loading") return <Spinner className="py-4" />
   if (state.status === "error") return <p className="text-text-muted text-xs text-center py-4">Odds unavailable</p>

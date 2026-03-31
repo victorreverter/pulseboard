@@ -1,26 +1,10 @@
 export function hexToRgba(hex: string, alpha = 1): string {
-  const r = parseInt(hex.slice(0, 2), 16)
-  const g = parseInt(hex.slice(2, 4), 16)
-  const b = parseInt(hex.slice(4, 6), 16)
+  const clean = hex.replace("#", "")
+  if (clean.length < 6) return `rgba(128, 128, 128, ${alpha})`
+  const r = parseInt(clean.slice(0, 2), 16)
+  const g = parseInt(clean.slice(2, 4), 16)
+  const b = parseInt(clean.slice(4, 6), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
-export function formatTime(isoDate: string): string {
-  const d = new Date(isoDate)
-  return d.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-}
-
-export function formatDate(isoDate: string): string {
-  const d = new Date(isoDate)
-  return d.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  })
 }
 
 export function percentDisplay(value: number): string {

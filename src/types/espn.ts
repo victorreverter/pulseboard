@@ -190,6 +190,38 @@ export interface EspnSituation {
   }
 }
 
+export interface EspnCompetition {
+  id: string
+  uid: string
+  date: string
+  attendance: number
+  type: { id: string; abbreviation: string }
+  timeValid: boolean
+  neutralSite: boolean
+  conferenceCompetition: boolean
+  playByPlayAvailable: boolean
+  recent: boolean
+  venue: EspnVenue
+  competitors: EspnCompetitor[]
+  notes: { type: string; headline: string }[]
+  status: EspnGameStatus
+  broadcasts: EspnBroadcast[]
+  headlines: EspnHeadline[]
+  highlights?: unknown[]
+  leaders?: EspnLeaderCategory[]
+  situation?: EspnSituation
+}
+
+export interface EspnSituation {
+  lastPlay: {
+    id: string
+    type: { id: string; text: string }
+    text: string
+    scoreValue: number
+    probability: EspnWinProbability
+  }
+}
+
 export interface EspnEvent {
   id: string
   uid: string
