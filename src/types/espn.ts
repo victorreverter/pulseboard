@@ -41,7 +41,7 @@ export interface EspnAthlete {
   displayName: string
   shortName: string
   links: EspnLink[]
-  headshot: {
+  headshot?: {
     href: string
     alt: string
   }

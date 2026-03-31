@@ -315,7 +315,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                       <p className="text-[10px] text-text-muted uppercase mb-1">{cat.displayName}</p>
                       {cat.leaders?.slice(0, 1).map((leader) => (
                         <div key={leader.athlete.id} className="flex items-center gap-2">
-                          {leader.athlete.headshot && (
+                          {leader.athlete.headshot?.href && (
                             <img
                               src={leader.athlete.headshot.href}
                               alt={leader.athlete.fullName}
@@ -361,7 +361,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                           <p className="text-[10px] text-text-muted uppercase">{cat.displayName}</p>
                           {cat.leaders?.slice(0, 1).map((leader) => (
                             <div key={leader.athlete.id} className="flex items-center gap-2 mt-0.5">
-                              {leader.athlete.headshot && (
+                              {leader.athlete.headshot?.href && (
                                 <img
                                   src={leader.athlete.headshot.href}
                                   alt={leader.athlete.fullName}
