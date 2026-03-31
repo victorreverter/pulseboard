@@ -1,12 +1,12 @@
-import type { SportConfig } from "../config/sports"
 import SportTabs from "./SportTabs"
 
 interface Props {
-  config: SportConfig
+  currentView: string
+  subtitle: string
   onSportChange: (id: string) => void
 }
 
-export default function Header({ config, onSportChange }: Props) {
+export default function Header({ currentView, subtitle, onSportChange }: Props) {
   return (
     <header className="border-b border-border bg-surface/50 backdrop-blur-sm sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -19,7 +19,7 @@ export default function Header({ config, onSportChange }: Props) {
             </div>
             <div>
               <h1 className="text-lg font-bold text-text-primary tracking-tight">PulseBoard</h1>
-              <p className="text-[10px] text-text-muted uppercase tracking-widest">{config.name} Live</p>
+              <p className="text-[10px] text-text-muted uppercase tracking-widest">{subtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -30,7 +30,7 @@ export default function Header({ config, onSportChange }: Props) {
           </div>
         </div>
         <div className="pb-3 -mx-1 px-1">
-          <SportTabs currentId={config.id} onChange={onSportChange} />
+          <SportTabs currentId={currentView} onChange={onSportChange} />
         </div>
       </div>
     </header>

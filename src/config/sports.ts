@@ -4,6 +4,7 @@ export interface SportConfig {
   shortName: string
   slug: string
   icon: string
+  priority: number
   capabilities: {
     injuries: boolean
     odds: boolean
@@ -18,14 +19,7 @@ export const SPORTS: SportConfig[] = [
     shortName: "NBA",
     slug: "basketball/nba",
     icon: "basketball",
-    capabilities: { injuries: true, odds: true, winProbability: true },
-  },
-  {
-    id: "wnba",
-    name: "WNBA",
-    shortName: "WNBA",
-    slug: "basketball/wnba",
-    icon: "basketball",
+    priority: 1,
     capabilities: { injuries: true, odds: true, winProbability: true },
   },
   {
@@ -34,15 +28,8 @@ export const SPORTS: SportConfig[] = [
     shortName: "NFL",
     slug: "football/nfl",
     icon: "football",
+    priority: 2,
     capabilities: { injuries: true, odds: true, winProbability: true },
-  },
-  {
-    id: "cfb",
-    name: "College Football",
-    shortName: "CFB",
-    slug: "football/college-football",
-    icon: "football",
-    capabilities: { injuries: true, odds: true, winProbability: false },
   },
   {
     id: "mlb",
@@ -50,6 +37,7 @@ export const SPORTS: SportConfig[] = [
     shortName: "MLB",
     slug: "baseball/mlb",
     icon: "baseball",
+    priority: 3,
     capabilities: { injuries: true, odds: true, winProbability: true },
   },
   {
@@ -58,15 +46,8 @@ export const SPORTS: SportConfig[] = [
     shortName: "NHL",
     slug: "hockey/nhl",
     icon: "hockey",
+    priority: 4,
     capabilities: { injuries: true, odds: true, winProbability: true },
-  },
-  {
-    id: "cbb",
-    name: "Men's CBB",
-    shortName: "CBB",
-    slug: "basketball/mens-college-basketball",
-    icon: "basketball",
-    capabilities: { injuries: false, odds: true, winProbability: false },
   },
   {
     id: "epl",
@@ -74,6 +55,7 @@ export const SPORTS: SportConfig[] = [
     shortName: "EPL",
     slug: "soccer/eng.1",
     icon: "soccer",
+    priority: 5,
     capabilities: { injuries: false, odds: true, winProbability: false },
   },
   {
@@ -82,6 +64,7 @@ export const SPORTS: SportConfig[] = [
     shortName: "LaLiga",
     slug: "soccer/esp.1",
     icon: "soccer",
+    priority: 6,
     capabilities: { injuries: false, odds: true, winProbability: false },
   },
   {
@@ -90,6 +73,34 @@ export const SPORTS: SportConfig[] = [
     shortName: "MLS",
     slug: "soccer/usa.1",
     icon: "soccer",
+    priority: 7,
+    capabilities: { injuries: false, odds: true, winProbability: false },
+  },
+  {
+    id: "wnba",
+    name: "WNBA",
+    shortName: "WNBA",
+    slug: "basketball/wnba",
+    icon: "basketball",
+    priority: 8,
+    capabilities: { injuries: true, odds: true, winProbability: true },
+  },
+  {
+    id: "cfb",
+    name: "College Football",
+    shortName: "CFB",
+    slug: "football/college-football",
+    icon: "football",
+    priority: 9,
+    capabilities: { injuries: true, odds: true, winProbability: false },
+  },
+  {
+    id: "cbb",
+    name: "Men's CBB",
+    shortName: "CBB",
+    slug: "basketball/mens-college-basketball",
+    icon: "basketball",
+    priority: 10,
     capabilities: { injuries: false, odds: true, winProbability: false },
   },
 ]
