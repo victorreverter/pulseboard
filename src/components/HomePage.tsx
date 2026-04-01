@@ -93,7 +93,7 @@ export default function HomePage({ state, onGameClick, onSeeAll }: Props) {
     <div className="space-y-8">
       <LiveSection events={live} onGameClick={onGameClick} />
 
-      <NextEventsCountdown upcoming={upcoming} live={live} />
+      <NextEventsCountdown upcoming={upcoming} live={live} onGameClick={onGameClick} />
 
       <div className="space-y-6">
         <div className="flex items-center gap-2">
