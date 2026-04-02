@@ -3,6 +3,7 @@ import type { SportEvent } from "../hooks/useMultiSport"
 import type { EspnEvent } from "../types/espn"
 import { getSportIcon } from "../config/sports-icons"
 import { hexToRgba } from "../lib/utils"
+import { formatGameDateLabel, formatGameTime } from "../lib/dates"
 
 interface Props {
   upcoming: SportEvent[]
@@ -20,27 +21,6 @@ function formatCountdown(diffMs: number): string {
   if (hours > 0) return `${hours}h ${minutes % 60}m`
   if (minutes > 0) return `${minutes}m`
   return `${seconds}s`
-}
-
-function formatGameTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-}
-
-function formatGameDate(dateStr: string): string {
-  const d = new Date(dateStr)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(d)
-  target.setHours(0, 0, 0, 0)
-  const diffDays = Math.round((target.getTime() - today.getTime()) / 86400000)
-  if (diffDays === 0) return "Today"
-  if (diffDays === 1) return "Tomorrow"
-  if (diffDays === -1) return "Yesterday"
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
 }
 
 function getTeams(se: SportEvent) {
@@ -109,7 +89,7 @@ function EventRow({ se, now, expanded, onToggle, onOpen }: {
                 {diff <= 0 ? "Now" : formatCountdown(diff)}
               </p>
               <p className="text-[10px] text-text-muted">
-                {formatGameDate(se.event.date)} · {formatGameTime(se.event.date)}
+                {formatGameDateLabel(se.event.date)} · {formatGameTime(se.event.date)}
               </p>
             </div>
           </div>
@@ -133,12 +113,30 @@ function EventRow({ se, now, expanded, onToggle, onOpen }: {
     >
       <div className="flex items-center gap-3 min-w-0">
         <span className="w-3.5 h-3.5 text-text-muted shrink-0">{getSportIcon(se.sportIcon)}</span>
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
           {away && home ? (
             <>
-              <span className="text-xs text-text-primary truncate">{away.team.abbreviation}</span>
+              <div
+                className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                style={{ background: hexToRgba(away.team.color, 0.15) }}
+              >
+                {away.team.logos?.[0] ? (
+                  <img src={away.team.logos[0].href} alt={away.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                ) : (
+                  <span className="text-[8px] font-bold" style={{ color: `#${away.team.color}` }}>{away.team.abbreviation}</span>
+                )}
+              </div>
               <span className="text-[10px] text-text-muted">@</span>
-              <span className="text-xs text-text-primary truncate">{home.team.abbreviation}</span>
+              <div
+                className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                style={{ background: hexToRgba(home.team.color, 0.15) }}
+              >
+                {home.team.logos?.[0] ? (
+                  <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                ) : (
+                  <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
+                )}
+              </div>
             </>
           ) : (
             <span className="text-xs text-text-primary truncate">{se.event.shortName}</span>
@@ -146,7 +144,7 @@ function EventRow({ se, now, expanded, onToggle, onOpen }: {
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className="text-[10px] text-text-muted">{formatGameDate(se.event.date)}</span>
+        <span className="text-[10px] text-text-muted">{formatGameDateLabel(se.event.date)}</span>
         <span className="text-xs font-mono text-text-secondary tabular-nums min-w-[60px] text-right">
           {formatCountdown(diff)}
         </span>

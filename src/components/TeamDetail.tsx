@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import type { EspnTeam } from "../types/espn"
 import { hexToRgba } from "../lib/utils"
+import { formatGameDateLabel } from "../lib/dates"
 import { isScheduled } from "../services/espn"
 import { siteUrl } from "../services/espn"
 import Modal from "./Modal"
@@ -73,6 +74,8 @@ function RecentResult({ event, teamAbbr }: { event: TeamScheduleEvent; teamAbbr:
   const won = team.winner
   const lost = opp.winner
   const isUpcoming = isScheduled(event)
+  const oppColor = (opp.team as { color?: string }).color ?? "666666"
+  const oppLogo = (opp.team as { logos?: { href: string; rel: string[] }[] }).logos?.[0]?.href
 
   return (
     <div className="flex items-center gap-3 py-2">
@@ -85,13 +88,23 @@ function RecentResult({ event, teamAbbr }: { event: TeamScheduleEvent; teamAbbr:
         {isUpcoming ? "—" : won ? "W" : lost ? "L" : "T"}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-text-primary truncate">
-          {team.homeAway === "home" ? "vs" : "@"} {opp.team.abbreviation}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-text-muted">{team.homeAway === "home" ? "vs" : "@"}</span>
+          <div
+            className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+            style={{ background: hexToRgba(oppColor, 0.15) }}
+          >
+            {oppLogo ? (
+              <img src={oppLogo} alt={opp.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+            ) : (
+              <span className="text-[8px] font-bold" style={{ color: `#${oppColor}` }}>{opp.team.abbreviation}</span>
+            )}
+          </div>
+        </div>
       </div>
       <span className="text-xs font-mono text-text-muted">
         {isUpcoming
-          ? new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+          ? formatGameDateLabel(event.date)
           : `${team.score}-${opp.score}`
         }
       </span>

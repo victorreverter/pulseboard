@@ -1,6 +1,7 @@
 import type { EspnEvent, EspnWinProbability } from "../types/espn"
 import { hexToRgba } from "../lib/utils"
 import { periodShortLabel } from "../lib/periods"
+import { formatGameTime } from "../lib/dates"
 import { isLive, isFinal } from "../services/espn"
 import type { SportEvent } from "../hooks/useMultiSport"
 import { getSportIcon } from "../config/sports-icons"
@@ -84,13 +85,7 @@ function StatusBadge({ event }: { event: EspnEvent }) {
     return <span className="text-[10px] font-semibold text-text-muted uppercase">Final</span>
   }
 
-  const time = new Date(event.date).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-
-  return <span className="text-[10px] font-mono text-text-muted">{time}</span>
+  return <span className="text-[10px] font-mono text-text-muted">{formatGameTime(event.date)}</span>
 }
 
 export default function MiniGameCard({ sportEvent, onClick, variant = "compact" }: Props) {
@@ -143,12 +138,11 @@ export default function MiniGameCard({ sportEvent, onClick, variant = "compact" 
               style={{ background: hexToRgba(away.team.color, 0.15) }}
             >
               {away.team.logos?.[0] ? (
-                <img src={away.team.logos[0].href} alt="" className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                <img src={away.team.logos[0].href} alt={away.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
               ) : (
                 <span className="text-[8px] font-bold" style={{ color: `#${away.team.color}` }}>{away.team.abbreviation}</span>
               )}
             </div>
-            <span className="text-xs text-text-primary truncate">{away.team.abbreviation}</span>
           </div>
           <span className="text-text-muted text-[10px]">@</span>
           <div className="flex items-center gap-1.5 shrink-0">
@@ -157,12 +151,11 @@ export default function MiniGameCard({ sportEvent, onClick, variant = "compact" 
               style={{ background: hexToRgba(home.team.color, 0.15) }}
             >
               {home.team.logos?.[0] ? (
-                <img src={home.team.logos[0].href} alt="" className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
               ) : (
                 <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
               )}
             </div>
-            <span className="text-xs text-text-primary truncate">{home.team.abbreviation}</span>
           </div>
         </div>
 

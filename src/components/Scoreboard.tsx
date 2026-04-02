@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react"
 import type { EspnEvent } from "../types/espn"
-import { isLive, isFinal, isScheduled, formatDateParam } from "../services/espn"
+import { isLive, isFinal, isScheduled } from "../services/espn"
+import { formatDisplayDate, shiftDate } from "../lib/dates"
 import GameCard from "./GameCard"
 import Card from "./Card"
 
@@ -19,33 +20,6 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "final", label: "Final" },
   { key: "upcoming", label: "Upcoming" },
 ]
-
-function formatDisplayDate(dateStr: string): string {
-  const y = parseInt(dateStr.slice(0, 4))
-  const m = parseInt(dateStr.slice(4, 6)) - 1
-  const d = parseInt(dateStr.slice(6, 8))
-  const date = new Date(y, m, d)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const target = new Date(y, m, d)
-
-  const diff = target.getTime() - today.getTime()
-  const dayMs = 86400000
-
-  if (diff === 0) return "Today"
-  if (diff === dayMs) return "Tomorrow"
-  if (diff === -dayMs) return "Yesterday"
-
-  return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
-}
-
-function shiftDate(dateStr: string, days: number): string {
-  const y = parseInt(dateStr.slice(0, 4))
-  const m = parseInt(dateStr.slice(4, 6)) - 1
-  const d = parseInt(dateStr.slice(6, 8))
-  const date = new Date(y, m, d + days)
-  return formatDateParam(date)
-}
 
 export default function Scoreboard({ events, date, onDateChange, onGameClick }: Props) {
   const [filter, setFilter] = useState<Filter>("all")

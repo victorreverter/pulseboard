@@ -261,7 +261,18 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
               className="grid gap-2 text-xs text-center"
               style={{ gridTemplateColumns: `auto repeat(${lineCount}, 1fr) auto` }}
             >
-              <span className="text-text-secondary text-[10px]">{away.team.abbreviation}</span>
+              <div className="flex justify-end">
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center"
+                  style={{ background: hexToRgba(away.team.color, 0.15) }}
+                >
+                  {away.team.logos?.[0] ? (
+                    <img src={away.team.logos[0].href} alt={away.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                  ) : (
+                    <span className="text-[8px] font-bold" style={{ color: `#${away.team.color}` }}>{away.team.abbreviation}</span>
+                  )}
+                </div>
+              </div>
               {away.linescores?.map((ls) => (
                 <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
               ))}
@@ -271,7 +282,18 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
               className="grid gap-2 text-xs text-center mt-1"
               style={{ gridTemplateColumns: `auto repeat(${lineCount}, 1fr) auto` }}
             >
-              <span className="text-text-secondary text-[10px]">{home.team.abbreviation}</span>
+              <div className="flex justify-end">
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center"
+                  style={{ background: hexToRgba(home.team.color, 0.15) }}
+                >
+                  {home.team.logos?.[0] ? (
+                    <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                  ) : (
+                    <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
+                  )}
+                </div>
+              </div>
               {home.linescores?.map((ls) => (
                 <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
               ))}
@@ -287,10 +309,32 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
             Stats
           </h3>
           <div className="bg-court-light/50 rounded-xl p-3">
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-2 text-[10px] text-text-muted uppercase tracking-wider mb-2 px-1">
-              <span className="text-right">{away.team.abbreviation}</span>
-              <span className="text-center w-20">Stat</span>
-              <span className="text-left">{home.team.abbreviation}</span>
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center mb-2 px-1">
+              <div className="flex justify-end">
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center"
+                  style={{ background: hexToRgba(away.team.color, 0.15) }}
+                >
+                  {away.team.logos?.[0] ? (
+                    <img src={away.team.logos[0].href} alt={away.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                  ) : (
+                    <span className="text-[8px] font-bold" style={{ color: `#${away.team.color}` }}>{away.team.abbreviation}</span>
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] text-text-muted uppercase tracking-wider text-center w-20">Stat</span>
+              <div className="flex justify-start">
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center"
+                  style={{ background: hexToRgba(home.team.color, 0.15) }}
+                >
+                  {home.team.logos?.[0] ? (
+                    <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
+                  ) : (
+                    <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
+                  )}
+                </div>
+              </div>
             </div>
             {statsToShow.map(({ key, label }) => (
               <StatRow
@@ -333,9 +377,18 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
 
               return (
                 <div key={comp.id} className="bg-court-light/50 rounded-xl p-3">
-                  <p className="text-[10px] text-text-muted uppercase mb-2 text-center">
-                    {comp.team.abbreviation}
-                  </p>
+                  <div className="flex justify-center mb-2">
+                    <div
+                      className="w-6 h-6 rounded-lg flex items-center justify-center"
+                      style={{ background: hexToRgba(comp.team.color, 0.15) }}
+                    >
+                      {comp.team.logos?.[0] ? (
+                        <img src={comp.team.logos[0].href} alt={comp.team.abbreviation} className="w-4 h-4 object-contain" loading="lazy" />
+                      ) : (
+                        <span className="text-[10px] font-bold" style={{ color: `#${comp.team.color}` }}>{comp.team.abbreviation}</span>
+                      )}
+                    </div>
+                  </div>
                   {uniqueLeaders.map((cat) => (
                     <div key={cat.name} className="mb-2 last:mb-0">
                       <p className="text-[10px] text-text-muted uppercase">{cat.displayName}</p>

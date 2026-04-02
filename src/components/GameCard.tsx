@@ -1,6 +1,7 @@
 import type { EspnEvent, EspnWinProbability } from "../types/espn"
 import { hexToRgba } from "../lib/utils"
 import { periodShortLabel } from "../lib/periods"
+import { formatGameTime } from "../lib/dates"
 import { isLive, isFinal } from "../services/espn"
 
 interface Props {
@@ -89,12 +90,6 @@ function GameStatus({ event }: { event: EspnEvent }) {
     )
   }
 
-  const gameTime = new Date(event.date).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-
   return (
     <div className="flex items-center gap-2">
       {event.week && (
@@ -102,7 +97,7 @@ function GameStatus({ event }: { event: EspnEvent }) {
           Week {event.week.number}
         </span>
       )}
-      <span className="text-xs font-mono text-text-muted">{gameTime}</span>
+      <span className="text-xs font-mono text-text-muted">{formatGameTime(event.date)}</span>
     </div>
   )
 }

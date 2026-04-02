@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { SPORTS } from "../config/sports"
-import { getScoreboard, isLive, isFinal, todayParam } from "../services/espn"
+import { getScoreboard, isLive, isFinal } from "../services/espn"
+import { todayParam } from "../lib/dates"
 import type { EspnEvent } from "../types/espn"
 
 export interface SportEvent {
