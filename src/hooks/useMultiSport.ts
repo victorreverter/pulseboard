@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { SPORTS } from "../config/sports"
 import { getScoreboard, isLive, isFinal } from "../services/espn"
-import { todayParam } from "../lib/dates"
+import { getDateRange } from "../lib/dates"
 import type { EspnEvent } from "../types/espn"
 
 export interface SportEvent {
@@ -32,20 +32,20 @@ export function useMultiSport() {
     let cancelled = false
 
     async function fetchAll() {
-      const date = todayParam()
+      const dates = getDateRange()
 
       const results = await Promise.allSettled(
-        SPORTS.map(async (sport) => {
-          const data = await getScoreboard(sport.slug, date)
-          return {
-            sport,
-            events: data.events,
-          }
-        })
+        SPORTS.flatMap((sport) =>
+          dates.map(async (date) => {
+            const data = await getScoreboard(sport.slug, date)
+            return { sport, events: data.events }
+          })
+        )
       )
 
       if (cancelled) return
 
+      const seen = new Set<string>()
       const live: SportEvent[] = []
       const upcoming: SportEvent[] = []
       const finalGames: SportEvent[] = []
@@ -55,9 +55,10 @@ export function useMultiSport() {
         if (result.status !== "fulfilled") continue
         const { sport, events } = result.value
 
-        const sportEvents: SportEvent[] = []
-
         for (const event of events) {
+          if (seen.has(event.id)) continue
+          seen.add(event.id)
+
           const se: SportEvent = {
             event,
             sportId: sport.id,
@@ -70,11 +71,12 @@ export function useMultiSport() {
           else if (isFinal(event)) finalGames.push(se)
           else upcoming.push(se)
 
-          sportEvents.push(se)
-        }
-
-        if (sportEvents.length > 0) {
-          byLeague.set(sport.id, { sport, events: sportEvents })
+          const leagueEntry = byLeague.get(sport.id)
+          if (leagueEntry) {
+            leagueEntry.events.push(se)
+          } else {
+            byLeague.set(sport.id, { sport, events: [se] })
+          }
         }
       }
 
