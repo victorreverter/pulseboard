@@ -1,5 +1,5 @@
 import type { EspnTeam } from "../types/espn"
-import { hexToRgba } from "../lib/utils"
+import { hexToRgba, getTeamLogo } from "../lib/utils"
 
 interface Props {
   teams: EspnTeam[]
@@ -12,7 +12,7 @@ export default function TeamGrid({ teams, selectedId, onSelect, onInfo }: Props)
   return (
     <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
       {teams.map((team) => {
-        const logo = team.logos?.find((l) => l.rel.includes("default"))?.href
+        const logo = getTeamLogo(team);
         const isSelected = team.id === selectedId
 
         return (
@@ -46,15 +46,9 @@ export default function TeamGrid({ teams, selectedId, onSelect, onInfo }: Props)
                 boxShadow: isSelected ? `0 0 12px ${hexToRgba(team.color, 0.3)}` : "none",
               }}
             >
-              {logo ? (
-                <img src={logo} alt={team.displayName} className="w-7 h-7 object-contain" loading="lazy" />
-              ) : (
-                <span className="text-xs font-bold" style={{ color: `#${team.color}` }}>
-                  {team.abbreviation}
-                </span>
-              )}
+              <img src={logo} alt={team.displayName} className="w-8 h-8 object-contain drop-shadow-md" loading="lazy" />
             </div>
-            <span className="text-[10px] text-text-secondary truncate w-full text-center">
+            <span className="text-[10px] font-semibold text-text-primary uppercase truncate w-full text-center tracking-wider">
               {team.abbreviation}
             </span>
           </div>

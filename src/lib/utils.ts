@@ -27,3 +27,23 @@ export function injuryStatusColor(status: string): string {
       return "text-text-secondary"
   }
 }
+
+export function getTeamLogo(team: any, sportSlug?: string): string {
+  if (team.logo && typeof team.logo === "string") return team.logo;
+  if (team.logos && team.logos.length > 0) {
+    const scoreboard = team.logos.find((l: any) => l.rel?.includes("scoreboard") || l.rel?.includes("default"));
+    if (scoreboard?.href) return scoreboard.href;
+    if (team.logos[0]?.href) return team.logos[0].href;
+  }
+  
+  // Ultimate visual fallback using ESPN CDN if no logo object is found
+  if (sportSlug && team.id) {
+    // some sportSlugs are like "basketball/nba", we just need the sport "basketball" or "nba"
+    // Actually ESPN's CDN accepts the sport group or league sometimes.
+    const sport = sportSlug.split('/')[0] === "soccer" ? "soccer" : sportSlug.split('/').pop() || sportSlug;
+    return `https://a.espncdn.com/i/teamlogos/${sport}/500/${team.id}.png`;
+  }
+  
+  // Absolute fallback to a generic placeholder (or the ESPN default)
+  return "https://a.espncdn.com/combiner/i?img=/i/teamlogos/default-team-logo-500.png"
+}

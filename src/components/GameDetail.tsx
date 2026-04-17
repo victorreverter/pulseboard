@@ -1,5 +1,5 @@
-import type { EspnEvent, EspnCompetitor } from "../types/espn"
-import { hexToRgba } from "../lib/utils"
+import type { EspnEvent, EspnCompetitor, EspnStat } from "../types/espn"
+import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { periodLabels, periodShortLabel } from "../lib/periods"
 import { isLive, isFinal } from "../services/espn"
 import Modal from "./Modal"
@@ -11,31 +11,34 @@ interface Props {
   onClose: () => void
 }
 
-function StatRow({ label, away, home }: { label: string; away: string; home: string }) {
+function StatRow({ label, away, home, awayColor, homeColor }: { label: string; away: string; home: string; awayColor: string; homeColor: string }) {
   const aNum = parseFloat(away) || 0
   const hNum = parseFloat(home) || 0
+  const total = aNum + hNum
+  const aPct = total > 0 ? (aNum / total) * 100 : 50
+  const hPct = total > 0 ? (hNum / total) * 100 : 50
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-1.5 text-xs">
-      <div className="text-right">
-        <span className={`font-mono ${aNum > hNum ? "text-text-primary font-semibold" : "text-text-muted"}`}>
+    <div className="py-2 hover:bg-white/5 rounded-lg px-2 transition-colors">
+      <div className="flex justify-between items-end mb-1.5">
+        <span className={`text-xs font-mono font-bold ${aNum > hNum ? "text-text-primary drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "text-text-muted opacity-70"}`}>
           {away}
         </span>
-      </div>
-      <span className="text-text-muted text-[10px] uppercase tracking-wider w-20 text-center truncate">
-        {label}
-      </span>
-      <div className="text-left">
-        <span className={`font-mono ${hNum > aNum ? "text-text-primary font-semibold" : "text-text-muted"}`}>
+        <span className="text-[10px] text-text-muted uppercase tracking-wider">{label}</span>
+        <span className={`text-xs font-mono font-bold ${hNum > aNum ? "text-text-primary drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]" : "text-text-muted opacity-70"}`}>
           {home}
         </span>
+      </div>
+      <div className="flex h-1.5 rounded-full overflow-hidden bg-black/50 border border-white/5">
+        <div className="transition-all duration-700 h-full" style={{ width: `${aPct}%`, backgroundColor: `#${awayColor}`, boxShadow: aNum > hNum ? `0 0 8px #${awayColor}` : 'none' }} />
+        <div className="transition-all duration-700 h-full" style={{ width: `${hPct}%`, backgroundColor: `#${homeColor}`, boxShadow: hNum > aNum ? `0 0 8px #${homeColor}` : 'none' }} />
       </div>
     </div>
   )
 }
 
-function CompetitorHeader({ comp, side }: { comp: EspnCompetitor; side: "away" | "home" }) {
-  const logo = comp.team.logos?.find((l) => l.rel.includes("scoreboard"))?.href ?? comp.team.logos?.[0]?.href
+function CompetitorHeader({ comp, side, sportSlug }: { comp: EspnCompetitor; side: "away" | "home"; sportSlug: string }) {
+  const logo = getTeamLogo(comp.team, sportSlug);
   const align = side === "away" ? "text-left" : "text-right"
 
   return (
@@ -44,13 +47,7 @@ function CompetitorHeader({ comp, side }: { comp: EspnCompetitor; side: "away" |
         className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
         style={{ background: hexToRgba(comp.team.color, 0.15) }}
       >
-        {logo ? (
-          <img src={logo} alt={comp.team.abbreviation} className="w-9 h-9 object-contain" loading="lazy" />
-        ) : (
-          <span className="text-lg font-bold" style={{ color: `#${comp.team.color}` }}>
-            {comp.team.abbreviation}
-          </span>
-        )}
+        <img src={logo} alt={comp.team.abbreviation} className="w-9 h-9 object-contain drop-shadow-md" loading="lazy" />
       </div>
       <div className={align}>
         <p className="text-sm font-semibold text-text-primary">{comp.team.displayName}</p>
@@ -136,26 +133,29 @@ function availableStats(competitors: EspnCompetitor[], uid: string): { key: stri
   return [...uniqueStats.values()].filter((s) => statNames.has(s.key))
 }
 
-function LeaderCategory({ cat }: { cat: { name: string; displayName: string; leaders?: { athlete: { id: string; fullName: string; shortName: string; headshot?: { href: string } }; displayValue: string }[] } }) {
+function LeaderCategory({ cat, teamColor }: { cat: any; teamColor?: string }) {
   const leader = cat.leaders?.[0]
   if (!leader) return null
 
   return (
-    <div>
-      <p className="text-[10px] text-text-muted uppercase mb-1">{cat.displayName}</p>
-      <div className="flex items-center gap-2">
-        {leader.athlete.headshot?.href && (
+    <div className="bg-surface/40 p-3 flex flex-col justify-center rounded-xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
+      <div className="absolute inset-0 opacity-10 blur-xl transition-opacity group-hover:opacity-20" style={{ backgroundColor: teamColor ? `#${teamColor}` : 'transparent' }} />
+      <p className="text-[10px] text-text-muted uppercase tracking-wider mb-2 relative z-10">{cat.displayName}</p>
+      <div className="flex items-center gap-3 relative z-10">
+        {leader.athlete.headshot?.href ? (
           <img
             src={leader.athlete.headshot.href}
             alt={leader.athlete.fullName}
-            className="w-7 h-7 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover border-2 border-white/10 drop-shadow-md"
             loading="lazy"
           />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-white/10" />
         )}
-        <span className="text-xs font-medium text-text-primary truncate">
-          {leader.athlete.fullName}
-        </span>
-        <span className="text-xs font-mono text-accent ml-auto">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-text-primary truncate">{leader.athlete.shortName || leader.athlete.fullName}</p>
+        </div>
+        <span className="text-xl font-display font-bold text-text-primary tabular-nums drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]">
           {leader.displayValue}
         </span>
       </div>
@@ -167,15 +167,15 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
   const comp = event.competitions?.[0]
   if (!comp) return null
 
-  const home = comp.competitors.find((c) => c.homeAway === "home")
-  const away = comp.competitors.find((c) => c.homeAway === "away")
+  const home = comp.competitors.find((c: EspnCompetitor) => c.homeAway === "home")
+  const away = comp.competitors.find((c: EspnCompetitor) => c.homeAway === "away")
   if (!home || !away) return null
 
   const homeStats = Object.fromEntries(
-    (home.statistics ?? []).map((s) => [s.name, s.displayValue])
+    (home.statistics ?? []).map((s: EspnStat) => [s.name, s.displayValue])
   )
   const awayStats = Object.fromEntries(
-    (away.statistics ?? []).map((s) => [s.name, s.displayValue])
+    (away.statistics ?? []).map((s: EspnStat) => [s.name, s.displayValue])
   )
 
   const statsToShow = availableStats(comp.competitors, event.uid)
@@ -183,12 +183,12 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
   const labels = periodLabels(lineCount, event.uid)
 
   const hasCompLeaders = comp.leaders && comp.leaders.length > 0
-  const hasTeamLeaders = comp.competitors.some((c) => c.leaders?.length > 0)
+  const hasTeamLeaders = comp.competitors.some((c: EspnCompetitor) => c.leaders?.length > 0)
 
   const uniqueCompLeaders = hasCompLeaders
     ? (() => {
         const seen = new Set<string>()
-        return comp.leaders!.filter((cat) => {
+        return comp.leaders!.filter((cat: any) => {
           if (seen.has(cat.displayName)) return false
           seen.add(cat.displayName)
           return true
@@ -221,7 +221,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
       }
     >
       <div className="flex items-center justify-between mb-6">
-        <CompetitorHeader comp={away} side="away" />
+        <CompetitorHeader comp={away} side="away" sportSlug={sportSlug} />
         <div className="text-center px-4">
           <div className="flex items-baseline gap-4">
             <span className="text-5xl font-display font-bold text-text-primary tabular-nums">
@@ -238,7 +238,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
             </p>
           )}
         </div>
-        <CompetitorHeader comp={home} side="home" />
+        <CompetitorHeader comp={home} side="home" sportSlug={sportSlug} />
       </div>
 
       {lineCount > 0 && (
@@ -273,7 +273,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                   )}
                 </div>
               </div>
-              {away.linescores?.map((ls) => (
+              {away.linescores?.map((ls: any) => (
                 <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
               ))}
               <span className="font-mono font-bold text-text-primary">{away.score}</span>
@@ -287,14 +287,10 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                   className="w-5 h-5 rounded flex items-center justify-center"
                   style={{ background: hexToRgba(home.team.color, 0.15) }}
                 >
-                  {home.team.logos?.[0] ? (
-                    <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
-                  ) : (
-                    <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
-                  )}
+                  <img src={getTeamLogo(home.team, sportSlug)} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
                 </div>
               </div>
-              {home.linescores?.map((ls) => (
+              {home.linescores?.map((ls: any) => (
                 <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
               ))}
               <span className="font-mono font-bold text-text-primary">{home.score}</span>
@@ -328,11 +324,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                   className="w-5 h-5 rounded flex items-center justify-center"
                   style={{ background: hexToRgba(home.team.color, 0.15) }}
                 >
-                  {home.team.logos?.[0] ? (
-                    <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
-                  ) : (
-                    <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
-                  )}
+                  <img src={getTeamLogo(home.team, sportSlug)} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
                 </div>
               </div>
             </div>
@@ -342,6 +334,8 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                 label={label}
                 away={awayStats[key] ?? "—"}
                 home={homeStats[key] ?? "—"}
+                awayColor={away.team.color}
+                homeColor={home.team.color}
               />
             ))}
           </div>
@@ -354,7 +348,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
             Leaders
           </h3>
           <div className="bg-court-light/50 rounded-xl p-3 space-y-3">
-            {uniqueCompLeaders.map((cat) => (
+            {uniqueCompLeaders.map((cat: any) => (
               <LeaderCategory key={cat.name} cat={cat} />
             ))}
           </div>
@@ -369,7 +363,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
           <div className="grid grid-cols-2 gap-3">
             {[away, home].map((comp) => {
               const seen = new Set<string>()
-              const uniqueLeaders = (comp.leaders ?? []).filter((cat) => {
+              const uniqueLeaders = (comp.leaders ?? []).filter((cat: any) => {
                 if (seen.has(cat.displayName)) return false
                 seen.add(cat.displayName)
                 return true
@@ -382,35 +376,11 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                       className="w-6 h-6 rounded-lg flex items-center justify-center"
                       style={{ background: hexToRgba(comp.team.color, 0.15) }}
                     >
-                      {comp.team.logos?.[0] ? (
-                        <img src={comp.team.logos[0].href} alt={comp.team.abbreviation} className="w-4 h-4 object-contain" loading="lazy" />
-                      ) : (
-                        <span className="text-[10px] font-bold" style={{ color: `#${comp.team.color}` }}>{comp.team.abbreviation}</span>
-                      )}
+                      <img src={getTeamLogo(comp.team, sportSlug)} alt={comp.team.abbreviation} className="w-4 h-4 object-contain" loading="lazy" />
                     </div>
                   </div>
-                  {uniqueLeaders.map((cat) => (
-                    <div key={cat.name} className="mb-2 last:mb-0">
-                      <p className="text-[10px] text-text-muted uppercase">{cat.displayName}</p>
-                      {cat.leaders?.slice(0, 1).map((leader) => (
-                        <div key={leader.athlete.id} className="flex items-center gap-2 mt-0.5">
-                          {leader.athlete.headshot?.href && (
-                            <img
-                              src={leader.athlete.headshot.href}
-                              alt={leader.athlete.fullName}
-                              className="w-6 h-6 rounded-full object-cover"
-                              loading="lazy"
-                            />
-                          )}
-                          <span className="text-xs text-text-primary truncate">
-                            {leader.athlete.shortName}
-                          </span>
-                          <span className="text-xs font-mono text-accent ml-auto">
-                            {leader.displayValue}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                  {uniqueLeaders.map((cat: any) => (
+                    <LeaderCategory key={cat.name} cat={cat} teamColor={comp.team.color} />
                   ))}
                 </div>
               )

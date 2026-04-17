@@ -1,5 +1,5 @@
 import type { EspnEvent, EspnWinProbability } from "../types/espn"
-import { hexToRgba } from "../lib/utils"
+import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { periodShortLabel } from "../lib/periods"
 import { formatGameTime } from "../lib/dates"
 import { isLive, isFinal } from "../services/espn"
@@ -13,37 +13,37 @@ function TeamRow({
   team,
   score,
   isWinner,
+  isFinalGame,
   isHome,
 }: {
   team: { abbreviation: string; displayName: string; color: string; logos: { href: string; rel: string[] }[] }
   score: string
   isWinner: boolean
+  isFinalGame: boolean
   isHome: boolean
 }) {
-  const logo = team.logos?.find((l) => l.rel.includes("scoreboard"))?.href ?? team.logos?.[0]?.href
+  const logo = getTeamLogo(team);
+  const dim = isFinalGame && !isWinner
 
   return (
-    <div className="flex items-center gap-3 py-1.5">
+    <div className={`flex items-center gap-3 py-1.5 transition-all ${dim ? "opacity-40 grayscale" : "opacity-100"}`}>
       <div
-        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 relative"
         style={{ background: hexToRgba(team.color, 0.15) }}
       >
-        {logo ? (
-          <img src={logo} alt={team.abbreviation} className="w-6 h-6 object-contain" loading="lazy" />
-        ) : (
-          <span className="text-xs font-bold" style={{ color: `#${team.color}` }}>
-            {team.abbreviation}
-          </span>
+        <img src={logo} alt={team.abbreviation} className="w-6 h-6 object-contain drop-shadow-sm" loading="lazy" />
+        {isWinner && isFinalGame && (
+          <div className="absolute -top-1.5 -right-1.5 text-xs drop-shadow-[0_0_2px_rgba(0,0,0,1)]">👑</div>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${isWinner ? "text-text-primary" : "text-text-secondary"}`}>
+        <p className={`text-sm font-medium truncate ${isWinner ? "text-text-primary drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "text-text-secondary"}`}>
           {team.displayName}
         </p>
         <p className="text-[10px] text-text-muted uppercase">{isHome ? "Home" : "Away"}</p>
       </div>
       <span
-        className={`text-2xl font-display font-bold tabular-nums ${isWinner ? "text-text-primary" : "text-text-muted"}`}
+        className={`text-2xl font-display font-bold tabular-nums ${isWinner ? "text-text-primary drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "text-text-muted"}`}
       >
         {score || "—"}
       </span>
@@ -127,9 +127,9 @@ export default function GameCard({ event, onClick }: Props) {
       </div>
 
       <div className="space-y-0.5">
-        <TeamRow team={away.team} score={away.score} isWinner={away.winner} isHome={false} />
+        <TeamRow team={away.team} score={away.score} isWinner={away.winner} isFinalGame={isFinal(event)} isHome={false} />
         <div className="border-t border-border/50" />
-        <TeamRow team={home.team} score={home.score} isWinner={home.winner} isHome={true} />
+        <TeamRow team={home.team} score={home.score} isWinner={home.winner} isFinalGame={isFinal(event)} isHome={true} />
       </div>
 
       {isLive(event) && probability && <WinProbabilityBar probability={probability} />}

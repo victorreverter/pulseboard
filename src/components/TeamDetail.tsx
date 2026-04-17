@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import type { EspnTeam } from "../types/espn"
-import { hexToRgba } from "../lib/utils"
+import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { formatGameDateLabel } from "../lib/dates"
 import { isScheduled } from "../services/espn"
 import { siteUrl } from "../services/espn"
@@ -75,7 +75,7 @@ function RecentResult({ event, teamAbbr }: { event: TeamScheduleEvent; teamAbbr:
   const lost = opp.winner
   const isUpcoming = isScheduled(event)
   const oppColor = (opp.team as { color?: string }).color ?? "666666"
-  const oppLogo = (opp.team as { logos?: { href: string; rel: string[] }[] }).logos?.[0]?.href
+  const oppLogo = getTeamLogo(opp.team);
 
   return (
     <div className="flex items-center gap-3 py-2">
@@ -94,11 +94,7 @@ function RecentResult({ event, teamAbbr }: { event: TeamScheduleEvent; teamAbbr:
             className="w-5 h-5 rounded flex items-center justify-center shrink-0"
             style={{ background: hexToRgba(oppColor, 0.15) }}
           >
-            {oppLogo ? (
-              <img src={oppLogo} alt={opp.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
-            ) : (
-              <span className="text-[8px] font-bold" style={{ color: `#${oppColor}` }}>{opp.team.abbreviation}</span>
-            )}
+            <img src={oppLogo} alt={opp.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
           </div>
         </div>
       </div>
@@ -141,7 +137,7 @@ export default function TeamDetail({ team, sportSlug, onClose }: Props) {
     return () => { cancelled = true }
   }, [sportSlug, team.id])
 
-  const logo = team.logos?.find((l) => l.rel.includes("default"))?.href
+  const logo = getTeamLogo(team, sportSlug);
   const schedule = state.status === "success" ? state.schedule : null
   const stats = state.status === "success" ? state.stats : null
   const loading = state.status === "loading"
@@ -156,13 +152,7 @@ export default function TeamDetail({ team, sportSlug, onClose }: Props) {
             className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{ background: hexToRgba(team.color, 0.15) }}
           >
-            {logo ? (
-              <img src={logo} alt={team.displayName} className="w-7 h-7 object-contain" loading="lazy" />
-            ) : (
-              <span className="text-sm font-bold" style={{ color: `#${team.color}` }}>
-                {team.abbreviation}
-              </span>
-            )}
+            <img src={logo} alt={team.displayName} className="w-7 h-7 object-contain" loading="lazy" />
           </div>
           <div>
             <h2 className="text-sm font-bold text-text-primary">{team.displayName}</h2>
@@ -182,13 +172,7 @@ export default function TeamDetail({ team, sportSlug, onClose }: Props) {
               className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: hexToRgba(team.color, 0.15) }}
             >
-              {logo ? (
-                <img src={logo} alt={team.displayName} className="w-12 h-12 object-contain" loading="lazy" />
-              ) : (
-                <span className="text-xl font-bold" style={{ color: `#${team.color}` }}>
-                  {team.abbreviation}
-                </span>
-              )}
+              <img src={logo} alt={team.displayName} className="w-12 h-12 object-contain" loading="lazy" />
             </div>
             <div>
               <p className="text-lg font-bold text-text-primary">{team.displayName}</p>
@@ -203,10 +187,23 @@ export default function TeamDetail({ team, sportSlug, onClose }: Props) {
           </div>
 
           <div className="mb-6">
-            <h3 className="text-[10px] text-text-muted uppercase tracking-wider mb-2">
-              Recent Results & Schedule
-            </h3>
-            <div className="bg-court-light/50 rounded-xl px-4 divide-y divide-border/30">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] text-text-muted uppercase tracking-wider">
+                Recent Form & Schedule
+              </h3>
+              <div className="flex items-center gap-1.5">
+                {recentGames.slice(-5).map((ev) => {
+                  if (isScheduled(ev)) return <div key={ev.id} className="w-2.5 h-2.5 rounded-full bg-border" title="Upcoming" />
+                  const t = ev.competitions[0].competitors.find(c => c.team.abbreviation === team.abbreviation)
+                  if (!t) return <div key={ev.id} className="w-2.5 h-2.5 rounded-full bg-border" />
+                  if (t.winner) return <div key={ev.id} className="w-2.5 h-2.5 rounded-full bg-live drop-shadow-[0_0_3px_rgba(0,255,136,0.8)]" title="Win" />
+                  const opp = ev.competitions[0].competitors.find(c => c.team.abbreviation !== team.abbreviation)
+                  if (opp?.winner) return <div key={ev.id} className="w-2.5 h-2.5 rounded-full bg-accent drop-shadow-[0_0_3px_rgba(255,46,147,0.8)]" title="Loss" />
+                  return <div key={ev.id} className="w-2.5 h-2.5 rounded-full bg-yellow-400 drop-shadow-[0_0_3px_rgba(250,204,21,0.8)]" title="Tie" />
+                })}
+              </div>
+            </div>
+            <div className="bg-surface/30 backdrop-blur-sm border border-white/5 rounded-xl px-4 divide-y divide-white/5">
               {recentGames.map((event) => (
                 <RecentResult key={event.id} event={event} teamAbbr={team.abbreviation} />
               ))}

@@ -1,5 +1,5 @@
 import type { EspnEvent, EspnWinProbability } from "../types/espn"
-import { hexToRgba } from "../lib/utils"
+import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { periodShortLabel } from "../lib/periods"
 import { formatGameTime } from "../lib/dates"
 import { isLive, isFinal } from "../services/espn"
@@ -23,7 +23,7 @@ function MiniTeamRow({
   isWinner: boolean
   showScore: boolean
 }) {
-  const logo = team.logos?.find((l) => l.rel.includes("scoreboard"))?.href ?? team.logos?.[0]?.href
+  const logo = getTeamLogo(team);
 
   return (
     <div className="flex items-center gap-2">
@@ -31,13 +31,7 @@ function MiniTeamRow({
         className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
         style={{ background: hexToRgba(team.color, 0.15) }}
       >
-        {logo ? (
-          <img src={logo} alt={team.abbreviation} className="w-5 h-5 object-contain" loading="lazy" />
-        ) : (
-          <span className="text-[10px] font-bold" style={{ color: `#${team.color}` }}>
-            {team.abbreviation}
-          </span>
-        )}
+        <img src={logo} alt={team.abbreviation} className="w-5 h-5 object-contain drop-shadow-sm" loading="lazy" />
       </div>
       <span className={`flex-1 text-sm truncate ${isWinner ? "text-text-primary font-medium" : "text-text-secondary"}`}>
         {team.displayName}
@@ -137,11 +131,7 @@ export default function MiniGameCard({ sportEvent, onClick, variant = "compact" 
               className="w-5 h-5 rounded flex items-center justify-center"
               style={{ background: hexToRgba(away.team.color, 0.15) }}
             >
-              {away.team.logos?.[0] ? (
-                <img src={away.team.logos[0].href} alt={away.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
-              ) : (
-                <span className="text-[8px] font-bold" style={{ color: `#${away.team.color}` }}>{away.team.abbreviation}</span>
-              )}
+              <img src={getTeamLogo(away.team, sportEvent.sportName)} alt={away.team.abbreviation} className="w-3.5 h-3.5 object-contain drop-shadow-sm" loading="lazy" />
             </div>
           </div>
           <span className="text-text-muted text-[10px]">@</span>
@@ -150,11 +140,7 @@ export default function MiniGameCard({ sportEvent, onClick, variant = "compact" 
               className="w-5 h-5 rounded flex items-center justify-center"
               style={{ background: hexToRgba(home.team.color, 0.15) }}
             >
-              {home.team.logos?.[0] ? (
-                <img src={home.team.logos[0].href} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
-              ) : (
-                <span className="text-[8px] font-bold" style={{ color: `#${home.team.color}` }}>{home.team.abbreviation}</span>
-              )}
+              <img src={getTeamLogo(home.team, sportEvent.sportName)} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain drop-shadow-sm" loading="lazy" />
             </div>
           </div>
         </div>
