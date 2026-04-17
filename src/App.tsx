@@ -87,7 +87,13 @@ export default function App() {
     : `${config.name} Live`
 
   return (
-    <div className="min-h-screen bg-court">
+    <div className="min-h-screen bg-court relative">
+      <div 
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at 15% 50%, rgba(255, 46, 147, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(0, 255, 136, 0.05), transparent 25%)'
+        }}
+      />
       <Header
         currentView={view}
         subtitle={subtitle}

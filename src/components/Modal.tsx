@@ -26,14 +26,14 @@ export default function Modal({ children, onClose, title, actions }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-2xl p-4"
       onClick={onClose}
     >
       <div
-        className="bg-surface border border-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+        className="bg-surface/80 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-[0_0_50px_rgba(0,0,0,0.5)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-surface/95 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-transparent border-b border-white/5 px-6 py-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-2">{title}</div>
           <div className="flex items-center gap-2">
             {actions}

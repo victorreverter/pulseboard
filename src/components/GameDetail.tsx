@@ -223,12 +223,12 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
       <div className="flex items-center justify-between mb-6">
         <CompetitorHeader comp={away} side="away" />
         <div className="text-center px-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-mono font-bold text-text-primary tabular-nums">
+          <div className="flex items-baseline gap-4">
+            <span className="text-5xl font-display font-bold text-text-primary tabular-nums">
               {away.score}
             </span>
-            <span className="text-lg text-text-muted">:</span>
-            <span className="text-3xl font-mono font-bold text-text-primary tabular-nums">
+            <span className="text-2xl font-display text-text-muted opacity-50">:</span>
+            <span className="text-5xl font-display font-bold text-text-primary tabular-nums">
               {home.score}
             </span>
           </div>

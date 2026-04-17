@@ -43,7 +43,7 @@ function TeamRow({
         <p className="text-[10px] text-text-muted uppercase">{isHome ? "Home" : "Away"}</p>
       </div>
       <span
-        className={`text-lg font-mono font-bold tabular-nums ${isWinner ? "text-text-primary" : "text-text-muted"}`}
+        className={`text-2xl font-display font-bold tabular-nums ${isWinner ? "text-text-primary" : "text-text-muted"}`}
       >
         {score || "—"}
       </span>
@@ -63,8 +63,8 @@ function WinProbabilityBar({ probability }: { probability: EspnWinProbability })
         <span>{home}%</span>
       </div>
       <div className="h-1.5 rounded-full bg-border overflow-hidden flex">
-        <div className="bg-accent transition-all duration-700" style={{ width: `${away}%` }} />
-        <div className="bg-live transition-all duration-700" style={{ width: `${home}%` }} />
+        <div className="bg-accent transition-all duration-700 drop-shadow-[0_0_8px_rgba(255,46,147,0.8)]" style={{ width: `${away}%` }} />
+        <div className="bg-live transition-all duration-700 drop-shadow-[0_0_8px_rgba(0,255,136,0.8)]" style={{ width: `${home}%` }} />
       </div>
     </div>
   )
@@ -115,7 +115,7 @@ export default function GameCard({ event, onClick }: Props) {
   return (
     <button
       onClick={() => onClick?.(event)}
-      className="w-full text-left bg-surface hover:bg-surface-hover border border-border rounded-xl p-4 transition-colors duration-150 group"
+      className="w-full text-left bg-surface/50 backdrop-blur-md hover:bg-surface-hover/70 border border-white/5 hover:border-white/10 rounded-xl p-4 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(255,46,147,0.15)]"
     >
       <div className="flex items-center justify-between mb-3">
         <GameStatus event={event} />

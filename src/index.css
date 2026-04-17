@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-court: #1a1a2e;
-  --color-court-light: #16213e;
-  --color-accent: #e94560;
-  --color-accent-glow: rgba(233, 69, 96, 0.3);
+  --color-court: #0b0914;
+  --color-court-light: rgba(30, 30, 50, 0.5);
+  --color-accent: #ff2e93;
+  --color-accent-glow: rgba(255, 46, 147, 0.3);
   --color-live: #00ff88;
   --color-live-glow: rgba(0, 255, 136, 0.3);
-  --color-surface: #1e1e32;
-  --color-surface-hover: #252540;
-  --color-border: #2a2a45;
-  --color-text-primary: #f0f0f5;
-  --color-text-secondary: #8888a0;
-  --color-text-muted: #555570;
+  --color-surface: rgba(30, 30, 50, 0.4);
+  --color-surface-hover: rgba(50, 50, 80, 0.5);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0b8;
+  --color-text-muted: #666680;
 
-  --font-display: "Inter", system-ui, sans-serif;
+  --font-display: "Outfit", system-ui, sans-serif;
+  --font-main: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -25,8 +26,8 @@
 
   body {
     margin: 0;
-    font-family: var(--font-display);
-    background: var(--color-court);
+    font-family: var(--font-main);
+    background-color: var(--color-court);
     color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -40,7 +41,10 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 }

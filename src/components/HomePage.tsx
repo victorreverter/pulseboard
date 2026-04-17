@@ -83,8 +83,14 @@ export default function HomePage({ state, onGameClick, onSeeAll }: Props) {
 
   if (state.status === "error") {
     return (
-      <div className="flex items-center justify-center py-20">
-        <p className="text-text-muted text-sm">Failed to load scores</p>
+      <div className="flex flex-col items-center justify-center py-32 bg-surface/30 backdrop-blur-sm rounded-2xl border border-white/5">
+        <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4 border border-accent/20">
+          <svg className="w-8 h-8 text-accent drop-shadow-[0_0_8px_rgba(255,46,147,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <p className="text-text-primary font-display font-medium text-lg">Signal Lost</p>
+        <p className="text-text-muted text-sm mt-1">Failed to connect to the sports network</p>
       </div>
     )
   }
@@ -127,12 +133,14 @@ export default function HomePage({ state, onGameClick, onSeeAll }: Props) {
       </div>
 
       {total === 0 && (
-        <div className="flex flex-col items-center justify-center py-20">
-          <svg className="w-12 h-12 text-text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <p className="text-text-secondary text-sm font-medium">No games today</p>
-          <p className="text-text-muted text-xs mt-1">Check back tomorrow</p>
+        <div className="flex flex-col items-center justify-center py-32 bg-surface/30 backdrop-blur-sm rounded-2xl border border-white/5">
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 border border-white/10">
+            <svg className="w-8 h-8 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <p className="text-text-primary font-display font-medium text-lg">The Court is Quiet</p>
+          <p className="text-text-muted text-sm mt-1">No major events scheduled for today</p>
         </div>
       )}
     </div>

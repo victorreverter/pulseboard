@@ -10,7 +10,7 @@ interface Props {
 
 export default function Card({ title, subtitle, icon, children, className = "" }: Props) {
   return (
-    <div className={`bg-surface rounded-xl border border-border overflow-hidden ${className}`}>
+    <div className={`bg-surface backdrop-blur-md rounded-xl border border-border shadow-lg overflow-hidden ${className}`}>
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
         {icon && <span className="text-accent">{icon}</span>}
         <div>
