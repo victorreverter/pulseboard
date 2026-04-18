@@ -28,10 +28,12 @@ export function injuryStatusColor(status: string): string {
   }
 }
 
-export function getTeamLogo(team: any, sportSlug?: string): string {
+import type { EspnTeam } from "../types/espn"
+
+export function getTeamLogo(team: Partial<EspnTeam>, sportSlug?: string): string {
   if (team.logo && typeof team.logo === "string") return team.logo;
   if (team.logos && team.logos.length > 0) {
-    const scoreboard = team.logos.find((l: any) => l.rel?.includes("scoreboard") || l.rel?.includes("default"));
+    const scoreboard = team.logos.find((l) => l.rel?.includes("scoreboard") || l.rel?.includes("default"));
     if (scoreboard?.href) return scoreboard.href;
     if (team.logos[0]?.href) return team.logos[0].href;
   }

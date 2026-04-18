@@ -1,4 +1,4 @@
-import type { EspnEvent, EspnWinProbability } from "../types/espn"
+import type { EspnEvent, EspnWinProbability, EspnTeam } from "../types/espn"
 import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { periodShortLabel } from "../lib/periods"
 import { formatGameTime } from "../lib/dates"
@@ -16,20 +16,20 @@ function TeamRow({
   isFinalGame,
   isHome,
 }: {
-  team: { abbreviation: string; displayName: string; color: string; logos: { href: string; rel: string[] }[] }
+  team: Partial<EspnTeam> & { logos?: any[] }
   score: string
   isWinner: boolean
   isFinalGame: boolean
   isHome: boolean
 }) {
-  const logo = getTeamLogo(team);
+  const logo = getTeamLogo(team as EspnTeam);
   const dim = isFinalGame && !isWinner
 
   return (
     <div className={`flex items-center gap-3 py-1.5 transition-all ${dim ? "opacity-40 grayscale" : "opacity-100"}`}>
       <div
         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 relative"
-        style={{ background: hexToRgba(team.color, 0.15) }}
+        style={{ background: hexToRgba(team.color || "666666", 0.15) }}
       >
         <img src={logo} alt={team.abbreviation} className="w-6 h-6 object-contain drop-shadow-sm" loading="lazy" />
         {isWinner && isFinalGame && (

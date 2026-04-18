@@ -1,4 +1,4 @@
-import type { EspnEvent, EspnWinProbability } from "../types/espn"
+import type { EspnEvent, EspnWinProbability, EspnTeam } from "../types/espn"
 import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { periodShortLabel } from "../lib/periods"
 import { formatGameTime } from "../lib/dates"
@@ -18,7 +18,7 @@ function MiniTeamRow({
   isWinner,
   showScore,
 }: {
-  team: { abbreviation: string; displayName: string; color: string; logos: { href: string; rel: string[] }[] }
+  team: Partial<EspnTeam> & { logos?: any[] }
   score: string
   isWinner: boolean
   showScore: boolean
@@ -29,7 +29,7 @@ function MiniTeamRow({
     <div className="flex items-center gap-2">
       <div
         className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-        style={{ background: hexToRgba(team.color, 0.15) }}
+        style={{ background: hexToRgba(team.color || "666666", 0.15) }}
       >
         <img src={logo} alt={team.abbreviation} className="w-5 h-5 object-contain drop-shadow-sm" loading="lazy" />
       </div>

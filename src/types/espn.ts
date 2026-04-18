@@ -32,6 +32,7 @@ export interface EspnTeam {
   isActive: boolean
   isAllStar: boolean
   logos: EspnLogo[]
+  logo?: string
   links?: EspnLink[]
 }
 

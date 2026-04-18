@@ -1,4 +1,4 @@
-import type { EspnEvent, EspnCompetitor, EspnStat } from "../types/espn"
+import type { EspnEvent, EspnCompetitor, EspnStat, EspnLeaderCategory, EspnLineScore } from "../types/espn"
 import { hexToRgba, getTeamLogo } from "../lib/utils"
 import { periodLabels, periodShortLabel } from "../lib/periods"
 import { isLive, isFinal } from "../services/espn"
@@ -133,7 +133,7 @@ function availableStats(competitors: EspnCompetitor[], uid: string): { key: stri
   return [...uniqueStats.values()].filter((s) => statNames.has(s.key))
 }
 
-function LeaderCategory({ cat, teamColor }: { cat: any; teamColor?: string }) {
+function LeaderCategory({ cat, teamColor }: { cat: EspnLeaderCategory; teamColor?: string }) {
   const leader = cat.leaders?.[0]
   if (!leader) return null
 
@@ -188,7 +188,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
   const uniqueCompLeaders = hasCompLeaders
     ? (() => {
         const seen = new Set<string>()
-        return comp.leaders!.filter((cat: any) => {
+        return comp.leaders!.filter((cat: EspnLeaderCategory) => {
           if (seen.has(cat.displayName)) return false
           seen.add(cat.displayName)
           return true
@@ -273,7 +273,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                   )}
                 </div>
               </div>
-              {away.linescores?.map((ls: any) => (
+              {away.linescores?.map((ls: EspnLineScore) => (
                 <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
               ))}
               <span className="font-mono font-bold text-text-primary">{away.score}</span>
@@ -290,7 +290,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                   <img src={getTeamLogo(home.team, sportSlug)} alt={home.team.abbreviation} className="w-3.5 h-3.5 object-contain" loading="lazy" />
                 </div>
               </div>
-              {home.linescores?.map((ls: any) => (
+              {home.linescores?.map((ls: EspnLineScore) => (
                 <span key={ls.period} className="font-mono text-text-primary">{ls.displayValue}</span>
               ))}
               <span className="font-mono font-bold text-text-primary">{home.score}</span>
@@ -348,7 +348,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
             Leaders
           </h3>
           <div className="bg-court-light/50 rounded-xl p-3 space-y-3">
-            {uniqueCompLeaders.map((cat: any) => (
+            {uniqueCompLeaders.map((cat: EspnLeaderCategory) => (
               <LeaderCategory key={cat.name} cat={cat} />
             ))}
           </div>
@@ -363,7 +363,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
           <div className="grid grid-cols-2 gap-3">
             {[away, home].map((comp) => {
               const seen = new Set<string>()
-              const uniqueLeaders = (comp.leaders ?? []).filter((cat: any) => {
+              const uniqueLeaders = (comp.leaders ?? []).filter((cat: EspnLeaderCategory) => {
                 if (seen.has(cat.displayName)) return false
                 seen.add(cat.displayName)
                 return true
@@ -379,7 +379,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                       <img src={getTeamLogo(comp.team, sportSlug)} alt={comp.team.abbreviation} className="w-4 h-4 object-contain" loading="lazy" />
                     </div>
                   </div>
-                  {uniqueLeaders.map((cat: any) => (
+                  {uniqueLeaders.map((cat: EspnLeaderCategory) => (
                     <LeaderCategory key={cat.name} cat={cat} teamColor={comp.team.color} />
                   ))}
                 </div>
