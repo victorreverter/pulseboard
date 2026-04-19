@@ -1,5 +1,5 @@
 import type { EspnEvent, EspnCompetitor, EspnStat, EspnLeaderCategory, EspnLineScore } from "../types/espn"
-import { hexToRgba, getTeamLogo } from "../lib/utils"
+import { hexToRgba, getTeamLogo, getPlayerHeadshot } from "../lib/utils"
 import { periodLabels, periodShortLabel } from "../lib/periods"
 import { isLive, isFinal } from "../services/espn"
 import Modal from "./Modal"
@@ -133,25 +133,28 @@ function availableStats(competitors: EspnCompetitor[], uid: string): { key: stri
   return [...uniqueStats.values()].filter((s) => statNames.has(s.key))
 }
 
-function LeaderCategory({ cat, teamColor }: { cat: EspnLeaderCategory; teamColor?: string }) {
+function LeaderCategory({ cat, teamColor, sportSlug }: { cat: EspnLeaderCategory; teamColor?: string; sportSlug: string }) {
   const leader = cat.leaders?.[0]
   if (!leader) return null
+
+  const headshot = getPlayerHeadshot(leader.athlete, sportSlug)
 
   return (
     <div className="bg-surface/40 p-3 flex flex-col justify-center rounded-xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
       <div className="absolute inset-0 opacity-10 blur-xl transition-opacity group-hover:opacity-20" style={{ backgroundColor: teamColor ? `#${teamColor}` : 'transparent' }} />
       <p className="text-[10px] text-text-muted uppercase tracking-wider mb-2 relative z-10">{cat.displayName}</p>
       <div className="flex items-center gap-3 relative z-10">
-        {leader.athlete.headshot?.href ? (
-          <img
-            src={leader.athlete.headshot.href}
-            alt={leader.athlete.fullName}
-            className="w-10 h-10 rounded-full object-cover border-2 border-white/10 drop-shadow-md"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-white/10" />
-        )}
+        <div className="relative w-10 h-10 rounded-full bg-white/10 shrink-0 overflow-hidden border-2 border-white/10 drop-shadow-md">
+          {headshot && (
+            <img
+              src={headshot}
+              alt={leader.athlete.fullName}
+              className="absolute inset-0 w-full h-full object-cover bg-surface/50"
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          )}
+        </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-text-primary truncate">{leader.athlete.shortName || leader.athlete.fullName}</p>
         </div>
@@ -349,7 +352,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
           </h3>
           <div className="bg-court-light/50 rounded-xl p-3 space-y-3">
             {uniqueCompLeaders.map((cat: EspnLeaderCategory) => (
-              <LeaderCategory key={cat.name} cat={cat} />
+              <LeaderCategory key={cat.name} cat={cat} sportSlug={sportSlug} />
             ))}
           </div>
         </div>
@@ -380,7 +383,7 @@ export default function GameDetail({ event, sportSlug, onClose }: Props) {
                     </div>
                   </div>
                   {uniqueLeaders.map((cat: EspnLeaderCategory) => (
-                    <LeaderCategory key={cat.name} cat={cat} teamColor={comp.team.color} />
+                    <LeaderCategory key={cat.name} cat={cat} teamColor={comp.team.color} sportSlug={sportSlug} />
                   ))}
                 </div>
               )

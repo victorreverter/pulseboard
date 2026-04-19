@@ -158,7 +158,7 @@ export default function App() {
                     </svg>
                   }
                 >
-                  <InjuryFeed injuries={filteredInjuries} />
+                  <InjuryFeed injuries={filteredInjuries} sportSlug={slug} />
                 </Card>
               )}
             </div>

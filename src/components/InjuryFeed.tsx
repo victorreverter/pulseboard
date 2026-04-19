@@ -1,7 +1,8 @@
 import type { EspnInjuryDetail } from "../types/espn"
-import { injuryStatusColor } from "../lib/utils"
+import { injuryStatusColor, getPlayerHeadshot } from "../lib/utils"
 
 interface Props {
+  sportSlug?: string
   injuries: {
     id: string
     displayName: string
@@ -9,7 +10,7 @@ interface Props {
   }[]
 }
 
-export default function InjuryFeed({ injuries }: Props) {
+export default function InjuryFeed({ injuries, sportSlug }: Props) {
   const allInjuries = injuries
     .flatMap((team) =>
       team.injuries.map((inj) => ({
@@ -28,24 +29,28 @@ export default function InjuryFeed({ injuries }: Props) {
     <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
       {allInjuries.slice(0, 20).map((inj) => {
         const logo = inj.athlete.team?.logos?.find((l) => l.rel.includes("default"))?.href
+        const headshot = getPlayerHeadshot(inj.athlete, sportSlug)
+        
         return (
           <div
             key={`${inj.teamId}-${inj.athlete.displayName}-${inj.date}`}
             className="flex items-start gap-3 p-3 rounded-lg bg-court-light/50 hover:bg-surface-hover transition-colors"
           >
-            <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-border/30 flex items-center justify-center">
-              {inj.athlete.headshot?.href ? (
-                <img
-                  src={inj.athlete.headshot.href}
-                  alt={inj.athlete.displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : logo ? (
+            <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-border/30 flex items-center justify-center">
+              {logo ? (
                 <img src={logo} alt={inj.teamName} className="w-6 h-6 object-contain" />
               ) : (
                 <span className="text-[10px] text-text-muted">
                   {inj.athlete.displayName.charAt(0)}
                 </span>
+              )}
+              {headshot && (
+                <img
+                  src={headshot}
+                  alt={inj.athlete.displayName}
+                  className="absolute inset-0 w-full h-full object-cover bg-surface"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
               )}
             </div>
             <div className="flex-1 min-w-0">

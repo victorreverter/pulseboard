@@ -79,7 +79,7 @@ export interface EspnLeaderAthlete {
     fullName: string
     displayName: string
     shortName: string
-    headshot: { href: string; alt: string }
+    headshot: string | { href: string; alt?: string }
     jersey: string
     position: { abbreviation: string }
   }

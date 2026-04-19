@@ -49,3 +49,14 @@ export function getTeamLogo(team: Partial<EspnTeam>, sportSlug?: string): string
   // Absolute fallback to a generic placeholder (or the ESPN default)
   return "https://a.espncdn.com/combiner/i?img=/i/teamlogos/default-team-logo-500.png"
 }
+
+export function getPlayerHeadshot(athlete: any, sportSlug?: string): string | undefined {
+  if (typeof athlete.headshot === "string") return athlete.headshot;
+  if (athlete.headshot?.href) return athlete.headshot.href;
+  if (!sportSlug || !athlete.id) return undefined;
+
+  const parts = sportSlug.split('/');
+  const league = parts[0] === 'soccer' ? 'soccer' : parts.pop() || sportSlug;
+  
+  return `https://a.espncdn.com/combiner/i?img=/i/headshots/${league}/players/full/${athlete.id}.png&w=350&h=254`;
+}
